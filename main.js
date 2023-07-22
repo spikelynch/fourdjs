@@ -11,11 +11,12 @@ function makeLink(link_m, n1, n2) {
 	const geometry = new THREE.CylinderGeometry(LINK_SIZE, LINK_SIZE,length);
 //	const geometry = new THREE.SphereGeometry(LINK_SIZE);
 	const cyl = new THREE.Mesh(geometry, link_m);
-	cyl.position.x = centre.x;
-	cyl.position.y = centre.y;
-	cyl.position.z = centre.z;
-	cyl.lookAt(n2);
-	return cyl;
+	const pivot = new THREE.Group();
+	pivot.add(cyl);
+	pivot.position.copy(centre);
+	pivot.lookAt(n2);
+	cyl.rotation.x = Math.PI / 2.0;
+	return pivot;
 }
 
 
