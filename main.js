@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
-const NODE_SIZE = 0.1;
-const LINK_SIZE = 0.05;
+const NODE_SIZE = 0.07;
+const LINK_SIZE = 0.02;
 
 
 function makeLink(link_m, n1, n2) {
@@ -43,15 +43,31 @@ function makeWireFrame(node_m, link_m, graph) {
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
+const light = new THREE.PointLight(0xffffff, 2);
+light.position.set(10, 10, 10);
+scene.add(light);
+
+
+const amblight = new THREE.AmbientLight(0xffffff, 0.2);
+scene.add(amblight);
+
+scene.background = new THREE.Color(0xdddddd);
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-const node_m = new THREE.MeshBasicMaterial( { color: 0x33ff00 } );
-const link_m = new THREE.MeshBasicMaterial( { color: 0x990030 } );
+const node_m = new THREE.MeshStandardMaterial(
+	{ color: 0x330000 } );
+
+node_m.roughness = 0.2;
+
+const link_m = new THREE.MeshStandardMaterial(
+	{ color: 0xf0f0f0 } );
 
 
-
+link_m.metalness = 0.4;
+link_m.roughness = 0.0;
 
 const shape = makeWireFrame(node_m, link_m, {
 	nodes: [
@@ -85,15 +101,15 @@ scene.add(shape);
 
 
 
-camera.position.z = 5;
+camera.position.z = 3;
 
 let tick = 0;
 
 function animate() {
 	requestAnimationFrame( animate );
 
-	shape.rotation.x = tick * 0.03;
-	shape.rotation.y = tick * 0.05;
+	shape.rotation.x = tick * 0.3;
+	shape.rotation.y = tick * 0.5;
 
 	tick += 0.01;
 	renderer.render( scene, camera );
