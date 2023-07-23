@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+
+
 const NODE_SIZE = 0.07;
 const LINK_SIZE = 0.02;
 
@@ -70,12 +72,56 @@ const CELL16 = {
 	]
 };
 
+
+
+
+function fourDtoV3(x, y, z, w) {
+	const k = HYPERPLANE / (HYPERPLANE + w);
+	return new THREE.Vector3(x * k, y * k, z * k);
+}
+
+
+class FourDShape extends THREE.Group {
+
+	constructor(node_m, link_m, structure) {
+		super();
+		this.node_m = node_m;
+		this.link_m = link_m;
+		this.nodes4 = structure.nodes;
+		this.nodes3 = {}; // is a dict-by-id
+		this.links = structure.links;
+		this.initNodes3();
+	}
+
+	initNodes3() {
+		for( const n of this.nodes4 ) {
+			const v3 = fourDtoV3(n.x, n.y, n.z, n.w);
+			this.nodes3[n.id] = {
+				v3: v3,
+				object: this.makeNode(v3)
+			};
+		}
+	}
+
+	makeNode(v3) {
+		const geometry = new THREE.SphereGeometry(NODE_SIZE);
+		const sphere = new THREE.Mesh(geometry, this.node_m);
+		sphere.position.copy(v3);
+		console.log(`Added sphere ${sphere}`);
+		this.add(sphere);
+		return sphere;
+	}
+}
+
+
+
+
+
 function makeLink(link_m, n1, n2) {
 	const length = n1.distanceTo(n2);
 	const centre = new THREE.Vector3();
 	centre.lerpVectors(n1, n2, 0.5);
 	const geometry = new THREE.CylinderGeometry(LINK_SIZE, LINK_SIZE,length);
-//	const geometry = new THREE.SphereGeometry(LINK_SIZE);
 	const cyl = new THREE.Mesh(geometry, link_m);
 	const pivot = new THREE.Group();
 	pivot.add(cyl);
@@ -108,39 +154,27 @@ function makeWireFrame(node_m, link_m, graph3) {
 
 
 
-function fourDtoV3(x, y, z, w) {
-	const k = HYPERPLANE / (HYPERPLANE + w);
-	return new THREE.Vector3(x * k, y * k, z * k);
-}
-
-
-function nodes4tonodes3(graph4) {
-	return graph4.map((n) => {
-		return { id: n.id, v3: fourDtoV3(n.x, n.y, n.z, n.w) }
-	})
-}
-
 
 // TODO - turn W into a parameter for the node size
 
-function makeShape4D(node_m, link_m, graph4) {
-	const nodes3 = nodes4tonodes3(graph4.nodes);
-	const nodeids = {}
-	const group = new THREE.Group();
-	for ( const n of nodes3 ) {
-		nodeids[n.id] = n.v3;
-		const geometry = new THREE.SphereGeometry(NODE_SIZE);
-		const sphere = new THREE.Mesh(geometry, node_m);
-		sphere.position.copy(n.v3);
-		group.add(sphere);
-	}
-	for ( const l of graph4.links ) {
-		const link = makeLink(link_m, nodeids[l.source], nodeids[l.target]);
-		group.add(link);
-	}
-	return group;
+// function makeShape4D(node_m, link_m, graph4) {
+// 	const nodes3 = nodes4tonodes3(graph4.nodes);
+// 	const nodeids = {}
+// 	const group = new FourDShape();
+// 	for ( const n of nodes3 ) {
+// 		nodeids[n.id] = n.v3;
+// 		const geometry = new THREE.SphereGeometry(NODE_SIZE);
+// 		const sphere = new THREE.Mesh(geometry, node_m);
+// 		sphere.position.copy(n.v3);
+// 		group.add(sphere);
+// 	}
+// 	for ( const l of graph4.links ) {
+// 		const link = makeLink(link_m, nodeids[l.source], nodeids[l.target]);
+// 		group.add(link);
+// 	}
+// 	return group;
 
-}
+// }
 
 
 
@@ -177,7 +211,7 @@ link_m.opacity = 0.3;
 
 
 
-const shape = makeShape4D(node_m, link_m, CELL5);
+const shape = new FourDShape(node_m, link_m, CELL5);
 
 
 
@@ -190,7 +224,6 @@ camera.position.z = 3;
 
 let tick = 0;
 
-// note: for 4d stuff we'll need to redraw the whole thing I think
 
 function animate() {
 	requestAnimationFrame( animate );
