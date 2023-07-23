@@ -72,12 +72,86 @@ const CELL16 = {
 	]
 };
 
+// hacky stuff for 4d rotations
+
+// see https://math.stackexchange.com/questions/1402362/can-rotations-in-4d-be-given-an-explicit-matrix-form#1402376
 
 
 
-function fourDtoV3(x, y, z, w) {
-	const k = HYPERPLANE / (HYPERPLANE + w);
-	return new THREE.Vector3(x * k, y * k, z * k);
+function rotZW(theta) {
+	const ctheta = Math.cos(theta);
+	const stheta = Math.sin(theta);
+	return new THREE.Matrix4(
+		ctheta, -stheta, 0, 0,
+		stheta, ctheta, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+		);
+}
+
+function rotYW(theta) {
+	const ctheta = Math.cos(theta);
+	const stheta = Math.sin(theta);
+	return new THREE.Matrix4(
+		ctheta, 0, -stheta, 0,
+		0, 1, 0, 0,
+		stheta, 0, ctheta, 0,
+		0, 0, 0, 1,
+		);
+}
+
+function rotYZ(theta) {
+	const ctheta = Math.cos(theta);
+	const stheta = Math.sin(theta);
+	return new THREE.Matrix4(
+		ctheta, 0, 0, -stheta,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		stheta, 0, 0, ctheta, 
+		);
+}
+
+function rotXW(theta) {
+	const ctheta = Math.cos(theta);
+	const stheta = Math.sin(theta);
+	return new THREE.Matrix4(
+		1, 0, 0, 0,
+		0, ctheta, -stheta, 0,
+		0, stheta, ctheta, 0,
+		0, 0, 0, 1
+		);
+}
+
+function rotXZ(theta) {
+	const ctheta = Math.cos(theta);
+	const stheta = Math.sin(theta);
+	return new THREE.Matrix4(
+		1, 0, 0, 0,
+		0, ctheta, 0, -stheta,
+		0, 0, 1, 0,
+		0, stheta, 0, ctheta,
+		);
+}
+
+function rotXY(theta) {
+	const ctheta = Math.cos(theta);
+	const stheta = Math.sin(theta);
+	return new THREE.Matrix4(
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, ctheta, -stheta,
+		0, 0, stheta, ctheta,
+		);
+}
+
+
+// putting rotation here first - it's a matrix4
+
+function fourDtoV3(x, y, z, w, m4) {
+	const v4 = new THREE.Vector4(x, y, z, w);
+	v4.applyMatrix4(m4);
+	const k = HYPERPLANE / (HYPERPLANE + v4.w);
+	return new THREE.Vector3(v4.x * k, v4.y * k, v4.z * k);
 }
 
 
@@ -88,93 +162,78 @@ class FourDShape extends THREE.Group {
 		this.node_m = node_m;
 		this.link_m = link_m;
 		this.nodes4 = structure.nodes;
-		this.nodes3 = {}; // is a dict-by-id
+		this.nodes3 = {};
 		this.links = structure.links;
-		this.initNodes3();
+		this.initShapes();
 	}
 
-	initNodes3() {
-		for( const n of this.nodes4 ) {
-			const v3 = fourDtoV3(n.x, n.y, n.z, n.w);
-			this.nodes3[n.id] = {
-				v3: v3,
-				object: this.makeNode(v3)
-			};
-		}
-	}
 
 	makeNode(v3) {
 		const geometry = new THREE.SphereGeometry(NODE_SIZE);
 		const sphere = new THREE.Mesh(geometry, this.node_m);
 		sphere.position.copy(v3);
-		console.log(`Added sphere ${sphere}`);
 		this.add(sphere);
 		return sphere;
 	}
-}
 
-
-
-
-
-function makeLink(link_m, n1, n2) {
-	const length = n1.distanceTo(n2);
-	const centre = new THREE.Vector3();
-	centre.lerpVectors(n1, n2, 0.5);
-	const geometry = new THREE.CylinderGeometry(LINK_SIZE, LINK_SIZE,length);
-	const cyl = new THREE.Mesh(geometry, link_m);
-	const pivot = new THREE.Group();
-	pivot.add(cyl);
-	pivot.position.copy(centre);
-	pivot.lookAt(n2);
-	cyl.rotation.x = Math.PI / 2.0;
-	return pivot;
-}
-
-
-
-function makeWireFrame(node_m, link_m, graph3) {
-	const nodeids = {}
-	const group = new THREE.Group();
-	for ( const n of graph3.nodes ) {
-		const v3 = new THREE.Vector3(n.x, n.y, n.z);
-		nodeids[n.id] = v3.clone();
-		const geometry = new THREE.SphereGeometry(NODE_SIZE);
-		const sphere = new THREE.Mesh(geometry, node_m);
-		sphere.position.copy(v3);
-		group.add(sphere);
+	makeLink(link) {
+		const n1 = this.nodes3[link.source].v3;
+		const n2 = this.nodes3[link.target].v3;
+		const length = n1.distanceTo(n2);
+		const centre = new THREE.Vector3();
+		centre.lerpVectors(n1, n2, 0.5);
+		const geometry = new THREE.CylinderGeometry(LINK_SIZE, LINK_SIZE, 1);
+		const cyl = new THREE.Mesh(geometry, this.link_m);
+		const edge = new THREE.Group();
+		edge.add(cyl);
+		edge.position.copy(centre);
+		edge.lookAt(n2);
+		edge.scale.copy(new THREE.Vector3(1, length, 1));
+		cyl.rotation.x = Math.PI / 2.0;
+		this.add(edge);
+		return edge;
 	}
-	for ( const l of graph3.links ) {
-		const link = makeLink(link_m, nodeids[l.source], nodeids[l.target]);
-		group.add(link);
+
+	updateLink(link) {
+		const n1 = this.nodes3[link.source].v3;
+		const n2 = this.nodes3[link.target].v3;
+		const length = n1.distanceTo(n2);
+		const centre = new THREE.Vector3();
+		centre.lerpVectors(n1, n2, 0.5);
+		link.object.position.copy(centre);
+		link.object.lookAt(n2);
+		link.object.scale.copy(new THREE.Vector3(1, 1, length));
 	}
-	return group;
+
+	initShapes() {
+		for( const n of this.nodes4 ) {
+			const v3 = fourDtoV3(n.x, n.y, n.z, n.w, new THREE.Matrix4());
+			this.nodes3[n.id] = {
+				v3: v3,
+				object: this.makeNode(v3)
+			};
+		}
+		for( const l of this.links ) {
+			l.object = this.makeLink(l);
+		}
+	}
+
+	update(m4) {
+		for( const n of this.nodes4 ) {
+			const v3 = fourDtoV3(n.x, n.y, n.z, n.w, m4);
+			this.nodes3[n.id].v3 = v3;
+			this.nodes3[n.id].object.position.copy(v3);
+			// could do scaling here
+		}
+		for( const l of this.links ) {
+			this.updateLink(l);
+		}
+	}
+
 }
 
 
 
-
-
-// TODO - turn W into a parameter for the node size
-
-// function makeShape4D(node_m, link_m, graph4) {
-// 	const nodes3 = nodes4tonodes3(graph4.nodes);
-// 	const nodeids = {}
-// 	const group = new FourDShape();
-// 	for ( const n of nodes3 ) {
-// 		nodeids[n.id] = n.v3;
-// 		const geometry = new THREE.SphereGeometry(NODE_SIZE);
-// 		const sphere = new THREE.Mesh(geometry, node_m);
-// 		sphere.position.copy(n.v3);
-// 		group.add(sphere);
-// 	}
-// 	for ( const l of graph4.links ) {
-// 		const link = makeLink(link_m, nodeids[l.source], nodeids[l.target]);
-// 		group.add(link);
-// 	}
-// 	return group;
-
-// }
 
 
 
@@ -196,7 +255,7 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 const node_m = new THREE.MeshStandardMaterial(
-	{ color: 0x330000 } );
+	{ color: 0x990044 } );
 
 node_m.roughness = 0.2;
 
@@ -213,25 +272,22 @@ link_m.opacity = 0.3;
 
 const shape = new FourDShape(node_m, link_m, CELL5);
 
-
-
-
 scene.add(shape);
 
+camera.position.z = 4;
+
+let theta = 0;
 
 
-camera.position.z = 3;
 
-let tick = 0;
-
+const rotation = new THREE.Matrix4();
 
 function animate() {
 	requestAnimationFrame( animate );
 
-	shape.rotation.x = tick * 0.3;
-	shape.rotation.y = tick * 0.5;
+	theta += 0.02;
 
-	tick += 0.01;
+	shape.update(rotXY(theta));
 	renderer.render( scene, camera );
 }
 animate();
