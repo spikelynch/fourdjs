@@ -1,14 +1,12 @@
 import * as THREE from 'three';
 
-import * as SHAPES from './shapes.js';
+import * as POLYTOPES from './polytopes.js';
 
+import { FourDShape } from './fourDShape.js';
 
-const NODE_SIZE = 0.08;
-const LINK_SIZE = 0.02;
 const NODE_OPACITY = 1.0;
 const LINK_OPACITY = 0.7;
 
-const HYPERPLANE = 2;
 
 
 
@@ -85,98 +83,6 @@ function rotXY(theta) {
 }
 
 
-// putting rotation here first - it's a matrix4
-
-function fourDtoV3(x, y, z, w, rotations) {
-	const v4 = new THREE.Vector4(x, y, z, w);
-	for ( const m4 of rotations ) {
-		v4.applyMatrix4(m4);
-	}
-	const k = HYPERPLANE / (HYPERPLANE + v4.w);
-	return new THREE.Vector3(v4.x * k, v4.y * k, v4.z * k);
-}
-
-
-class FourDShape extends THREE.Group {
-
-	constructor(node_ms, link_m, structure) {
-		super();
-		this.node_ms = node_ms;
-		this.link_m = link_m;
-		this.nodes4 = structure.nodes;
-		this.nodes3 = {};
-		this.links = structure.links;
-		this.initShapes();
-	}
-
-	makeNode(material, v3) {
-		const geometry = new THREE.SphereGeometry(NODE_SIZE);
-		const sphere = new THREE.Mesh(geometry, material);
-		sphere.position.copy(v3);
-		this.add(sphere);
-		return sphere;
-	}
-
-	makeLink(link) {
-		const n1 = this.nodes3[link.source].v3;
-		const n2 = this.nodes3[link.target].v3;
-		const length = n1.distanceTo(n2);
-		const centre = new THREE.Vector3();
-		centre.lerpVectors(n1, n2, 0.5);
-		const geometry = new THREE.CylinderGeometry(LINK_SIZE, LINK_SIZE, 1);
-		const cyl = new THREE.Mesh(geometry, this.link_m);
-		const edge = new THREE.Group();
-		edge.add(cyl);
-		edge.position.copy(centre);
-		edge.scale.copy(new THREE.Vector3(1, 1, length));
-		edge.lookAt(n2);
-		cyl.rotation.x = Math.PI / 2.0;
-		this.add(edge);
-		return edge;
-	}
-
-	updateLink(link) {
-		const n1 = this.nodes3[link.source].v3;
-		const n2 = this.nodes3[link.target].v3;
-		const length = n1.distanceTo(n2);
-		const centre = new THREE.Vector3();
-		centre.lerpVectors(n1, n2, 0.5);
-		link.object.scale.copy(new THREE.Vector3(1, 1, length));
-		link.object.position.copy(centre);
-		link.object.lookAt(n2);
-		link.object.children[0].rotation.x = Math.PI / 2.0;
-	}
-
-	initShapes() {
-		for( const n of this.nodes4 ) {
-			const v3 = fourDtoV3(n.x, n.y, n.z, n.w, []);
-			const material = this.node_ms[n.label];
-			this.nodes3[n.id] = {
-				v3: v3,
-				object: this.makeNode(material, v3)
-			};
-		}
-		for( const l of this.links ) {
-			l.object = this.makeLink(l);
-		}
-	}
-
-	render3(rotations) {
-		for( const n of this.nodes4 ) {
-			const v3 = fourDtoV3(n.x, n.y, n.z, n.w, rotations);
-			this.nodes3[n.id].v3 = v3;
-			this.nodes3[n.id].object.position.copy(v3);
-			// could do scaling here
-		}
-
-		for( const l of this.links ) {
-			this.updateLink(l);
-		}
-	}
-
-
-}
-
 
 
 
@@ -195,11 +101,12 @@ scene.add(amblight);
 
 scene.background = new THREE.Color(0xdddddd);
 
+
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-const struct = SHAPES.cell24();
+const struct = POLYTOPES.cell24();
 
 // TODO = automate going from struct labels to colours, this now only
 // works with the 24-cell
