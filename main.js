@@ -3,9 +3,11 @@ import * as THREE from 'three';
 import * as SHAPES from './shapes.js';
 
 const NODE_SIZE = 0.07;
-const LINK_SIZE = 0.02;
+const LINK_SIZE = 0.03;
+const NODE_OPACITY = 1.0;
+const LINK_OPACITY = 0.8;
 
-const HYPERPLANE = 4;
+const HYPERPLANE = 2;
 
 
 
@@ -200,14 +202,23 @@ const node_m = new THREE.MeshStandardMaterial(
 
 node_m.roughness = 0.2;
 
+if( NODE_OPACITY < 1.0 ) {
+	node_m.transparent = true;	
+	node_m.opacity = NODE_OPACITY;
+}
+
+
 const link_m = new THREE.MeshStandardMaterial(
 	{ color: 0xb0b0b0 } );
 
 
 link_m.metalness = 0.4;
 link_m.roughness = 0.0;
-link_m.transparent = true;
-link_m.opacity = 0.5;
+
+if( LINK_OPACITY < 1.0 ) {
+	link_m.transparent = true;	
+	link_m.opacity = LINK_OPACITY;
+}
 
 const struct = SHAPES.cell24();
 
