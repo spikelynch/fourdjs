@@ -2,6 +2,8 @@ import * as THREE from 'three';
 
 import * as SHAPES from './shapes.js';
 
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
 const NODE_SIZE = 0.07;
 const LINK_SIZE = 0.03;
 const NODE_OPACITY = 1.0;
@@ -188,7 +190,7 @@ light.position.set(10, 10, 10);
 scene.add(light);
 
 
-const amblight = new THREE.AmbientLight(0xffffff, 0.2);
+const amblight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(amblight);
 
 scene.background = new THREE.Color(0xdddddd);
@@ -196,6 +198,14 @@ scene.background = new THREE.Color(0xdddddd);
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
+
+
+const controls = new OrbitControls( camera, renderer.domElement );
+controls.target.set( 0, 0, 0 );
+controls.update();
+controls.enablePan = false;
+controls.enableDamping = true;
+
 
 const node_m = new THREE.MeshStandardMaterial(
 	{ color: 0x990044 } );
@@ -227,6 +237,7 @@ const shape = new FourDShape(node_m, link_m, struct);
 scene.add(shape);
 
 camera.position.z = 4;
+
 
 let theta = 0;
 
