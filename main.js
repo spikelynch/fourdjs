@@ -108,17 +108,13 @@ document.body.appendChild( renderer.domElement );
 
 const struct = POLYTOPES.cell24();
 
-// TODO = automate going from struct labels to colours, this now only
-// works with the 24-cell
+const node_ms = [
+	new THREE.MeshStandardMaterial( { color: 0x990000 } ),
+	new THREE.MeshStandardMaterial( { color: 0x009900 } ),
+	new THREE.MeshStandardMaterial( { color: 0x000099 } ),
+];
 
-const node_ms = {};
-
-node_ms["RED"] = new THREE.MeshStandardMaterial( { color: 0x990044 } );
-node_ms["GREEN"] = new THREE.MeshStandardMaterial( { color: 0xffffee } );
-node_ms["BLUE"] = new THREE.MeshStandardMaterial( { color: 0x101010 } );
-
-for( const label in node_ms ) {
-	const node_m = node_ms[label];
+for( const node_m of node_ms ) {
 	node_m.roughness = 0.2;
 
 	if( NODE_OPACITY < 1.0 ) {
@@ -127,21 +123,24 @@ for( const label in node_ms ) {
 	}
 }
 
+const link_ms = [
+	new THREE.MeshStandardMaterial( { color: 0x999900 } ),
+	new THREE.MeshStandardMaterial( { color: 0x009999 } ),
+	new THREE.MeshStandardMaterial( { color: 0x990099 } ),
+	];
 
-const link_m = new THREE.MeshStandardMaterial(
-	{ color: 0xb0b0b0 } );
+for( const link_m of link_ms ) {
+	link_m.metalness = 0.4;
+	link_m.roughness = 0.0;
 
-
-link_m.metalness = 0.4;
-link_m.roughness = 0.0;
-
-if( LINK_OPACITY < 1.0 ) {
-	link_m.transparent = true;	
-	link_m.opacity = LINK_OPACITY;
+	if( NODE_OPACITY < 1.0 ) {
+		node_m.transparent = true;	
+		node_m.opacity = NODE_OPACITY;
+	}
 }
 
 
-const shape = new FourDShape(node_ms, link_m, struct);
+const shape = new FourDShape(node_ms, link_ms, struct);
 
 scene.add(shape);
 

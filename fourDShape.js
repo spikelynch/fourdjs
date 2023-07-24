@@ -19,14 +19,24 @@ function fourDtoV3(x, y, z, w, rotations) {
 
 class FourDShape extends THREE.Group {
 
-	constructor(node_ms, link_m, structure) {
+	constructor(node_ms, link_ms, structure) {
 		super();
 		this.node_ms = node_ms;
-		this.link_m = link_m;
+		this.link_ms = link_ms;
 		this.nodes4 = structure.nodes;
 		this.nodes3 = {};
 		this.links = structure.links;
 		this.initShapes();
+	}
+
+	// if a node/link has no label, use the 0th material
+
+	getMaterial(entity, materials) {
+		if( "label" in entity ) {
+			return materials[entity.label];
+		} else {
+			return materials[0];
+		}
 	}
 
 	makeNode(material, v3) {
@@ -37,14 +47,14 @@ class FourDShape extends THREE.Group {
 		return sphere;
 	}
 
-	makeLink(link) {
+	makeLink(material, link) {
 		const n1 = this.nodes3[link.source].v3;
 		const n2 = this.nodes3[link.target].v3;
 		const length = n1.distanceTo(n2);
 		const centre = new THREE.Vector3();
 		centre.lerpVectors(n1, n2, 0.5);
 		const geometry = new THREE.CylinderGeometry(LINK_SIZE, LINK_SIZE, 1);
-		const cyl = new THREE.Mesh(geometry, this.link_m);
+		const cyl = new THREE.Mesh(geometry, material);
 		const edge = new THREE.Group();
 		edge.add(cyl);
 		edge.position.copy(centre);
@@ -70,14 +80,15 @@ class FourDShape extends THREE.Group {
 	initShapes() {
 		for( const n of this.nodes4 ) {
 			const v3 = fourDtoV3(n.x, n.y, n.z, n.w, []);
-			const material = this.node_ms[n.label];
+			const material = this.getMaterial(n, this.node_ms);
 			this.nodes3[n.id] = {
 				v3: v3,
 				object: this.makeNode(material, v3)
 			};
 		}
 		for( const l of this.links ) {
-			l.object = this.makeLink(l);
+			const material = this.getMaterial(l, this.link_ms);
+			l.object = this.makeLink(material, l);
 		}
 	}
 

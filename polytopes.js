@@ -1,5 +1,7 @@
 const r5 = Math.sqrt(5);
 
+// if nodes or links have no label, use the first material in the
+// list
 
 export const CELL5 = {
 	nodes: [
@@ -127,10 +129,18 @@ export const TESSERACT = {
 // this was done manually and I'm not sure if it's right
 
 const CELL24_INDEXING = {
-	x: { y: 'RED', z: 'BLUE', w: 'GREEN' },
-	y: { z: 'GREEN', w: 'BLUE' },
-	z: { w: 'RED' } 
+	x: { y: 0, z: 2, w: 1 },
+	y: { z: 1, w: 2 },
+	z: { w: 0 },
 };
+
+// note that this depends on the colour mapping in main.js, yuck
+
+const CELL24_LINK_INDEXING = {
+	0: { 1: 0, 2: 2 },
+	1: { 0: 0, 2: 1 },
+	2: { 0: 2, 1: 1 },
+}
 
 function make_24cell_vertices() {
 	const axes = [ 'x', 'y', 'z', 'w' ];
@@ -179,7 +189,8 @@ function make_24cell_edges(nodes) {
 			const fp = ids.join(',');
 			if( !seen[fp] ) {
 				seen[fp] = true;
-				links.push({ id: id, source: n1.id, target: n2.id });
+				const label = CELL24_LINK_INDEXING[n1.label][n2.label];
+				links.push({ id: id, label: label, source: n1.id, target: n2.id });
 			}
 		}
 	}
@@ -190,6 +201,9 @@ export const cell24 = () => {
 	const nodes = make_24cell_vertices();
 	const links = make_24cell_edges(nodes);
 
-	return { nodes: nodes, links: links, labels: [ "RED", "GREEN", "BLUE" ] };
+	return {
+		nodes: nodes,
+		links: links
+	};
 }
 
