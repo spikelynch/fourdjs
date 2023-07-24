@@ -2,7 +2,6 @@ import * as THREE from 'three';
 
 import * as SHAPES from './shapes.js';
 
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const NODE_SIZE = 0.07;
 const LINK_SIZE = 0.03;
@@ -200,11 +199,6 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 
-const controls = new OrbitControls( camera, renderer.domElement );
-controls.target.set( 0, 0, 0 );
-controls.update();
-controls.enablePan = false;
-controls.enableDamping = true;
 
 
 const node_m = new THREE.MeshStandardMaterial(
@@ -236,10 +230,28 @@ const shape = new FourDShape(node_m, link_m, struct);
 
 scene.add(shape);
 
+
 camera.position.z = 4;
 
-
 let theta = 0;
+let psi = 0;
+let startX = 0;
+let startY = 0;
+
+renderer.domElement.addEventListener("mousedown", (event) => {
+	if( event.buttons === 1 ) {
+		startX = event.clientX;
+		startY = event.clientY;
+	}
+})
+
+
+renderer.domElement.addEventListener("mousemove", (event) => {
+	if( event.buttons === 1 ) {
+		theta = (event.clientX - startX) * 0.01;
+		psi = (event.clientY - startY) * 0.01;
+	}
+})
 
 
 
@@ -248,11 +260,8 @@ const rotation = new THREE.Matrix4();
 function animate() {
 	requestAnimationFrame( animate );
 
-	theta += 0.01;
-
-	const rotations = [rotYZ(theta * 0.33), rotXW(theta * 0.5)];
+	const rotations = [rotYZ(theta), rotXW(psi)];
 	shape.render3(rotations);
-
 
 	renderer.render( scene, camera );
 }
