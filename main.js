@@ -4,8 +4,6 @@ import * as POLYTOPES from './polytopes.js';
 
 import { FourDShape } from './fourDShape.js';
 
-const NODE_OPACITY = 1.0;
-const LINK_OPACITY = 0.7;
 
 
 
@@ -106,16 +104,28 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-const struct = POLYTOPES.cell24();
+
+const NODE_OPACITY = 1.0;
+const LINK_OPACITY = 0.7;
+
+// nodes. links
+// 0 R    0 (0-1) Y
+// 1 G    1 (1-2) C
+// 2 B    2 (0-2) M
+
+// duals
+// 0 C    0 (0-1) G 
+// 1 Y    1 (1-2) R
+// 2 M    2 (0-2) B
 
 const node_ms = [
-	new THREE.MeshStandardMaterial( { color: 0x990000 } ),
-	new THREE.MeshStandardMaterial( { color: 0x009900 } ),
-	new THREE.MeshStandardMaterial( { color: 0x000099 } ),
+	new THREE.MeshStandardMaterial( { color: 0x20dddd } ),
+	new THREE.MeshStandardMaterial( { color: 0xdddd20 } ),
+	new THREE.MeshStandardMaterial( { color: 0xdd20dd } ),
 ];
 
 for( const node_m of node_ms ) {
-	node_m.roughness = 0.2;
+	node_m.roughness = 0.9;
 
 	if( NODE_OPACITY < 1.0 ) {
 		node_m.transparent = true;	
@@ -124,20 +134,22 @@ for( const node_m of node_ms ) {
 }
 
 const link_ms = [
-	new THREE.MeshStandardMaterial( { color: 0x999900 } ),
-	new THREE.MeshStandardMaterial( { color: 0x009999 } ),
-	new THREE.MeshStandardMaterial( { color: 0x990099 } ),
+	new THREE.MeshStandardMaterial( { color: 0x20dd20 } ),
+	new THREE.MeshStandardMaterial( { color: 0xdd2020 } ),
+	new THREE.MeshStandardMaterial( { color: 0x2020dd } ),
 	];
 
 for( const link_m of link_ms ) {
-	link_m.metalness = 0.4;
-	link_m.roughness = 0.0;
+	link_m.metalness = 0.8;
+	link_m.roughness = 0.1;
 
-	if( NODE_OPACITY < 1.0 ) {
-		node_m.transparent = true;	
-		node_m.opacity = NODE_OPACITY;
+	if( LINK_OPACITY < 1.0 ) {
+		link_m.transparent = true;	
+		link_m.opacity = LINK_OPACITY;
 	}
 }
+
+const struct = POLYTOPES.cell24();
 
 
 const shape = new FourDShape(node_ms, link_ms, struct);
