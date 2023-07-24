@@ -124,12 +124,9 @@ export const TESSERACT = {
 	]
 };
 
-export const cell24 = () => {
-	const structure = {
-		nodes: [],
-		links: []
-	};
+function make_24cell_vertices() {
 	const axes = [ 'x', 'y', 'z', 'w' ];
+	const nodes = [];
 	let i = 1;
 	for ( let p = 0; p < 3; p++ ) {
 		for ( let q = p + 1; q < 4; q++ ) {
@@ -140,12 +137,46 @@ export const cell24 = () => {
 					const node = { id: i, x: 0, y: 0, z: 0, w:0 };
 					node[a1] = v1;
 					node[a2] = v2;
-					structure.nodes.push(node);
+					nodes.push(node);
 					i++;
 				}
 			}
 		}
 	}
-	return structure;
+	return nodes;
+}
+
+
+
+function node_axes(n1) {
+	return [ 'x', 'y', 'z', 'w' ].filter((a) => n1[a] !== 0 );
+}
+
+function make_24cell_edges(nodes) {
+	const seen = {};
+	const links = [];
+	let id = 1;
+	for( const n1 of nodes ) {
+		const axes = node_axes(n1);
+		const axeq = nodes.filter((n) => n[axes[0]] === n1[axes[0]] && n[axes[1]] === 0);
+		const axeq2 = nodes.filter((n) => n[axes[1]] === n1[axes[1]] && n[axes[0]] === 0);
+		for( const n2 of axeq.concat(axeq2) ) {
+			const ids = [ n1.id, n2.id ];
+			ids.sort();
+			const fp = ids.join(',');
+			if( !seen[fp] ) {
+				seen[fp] = true;
+				links.push({ id: id, source: n1.id, target: n2.id });
+			}
+		}
+	}
+	return links;
+}
+
+export const cell24 = () => {
+	const nodes = make_24cell_vertices();
+	const links = make_24cell_edges(nodes);
+
+	return { nodes: nodes, links: links };
 }
 
