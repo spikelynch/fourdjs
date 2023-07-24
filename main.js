@@ -3,10 +3,10 @@ import * as THREE from 'three';
 import * as SHAPES from './shapes.js';
 
 
-const NODE_SIZE = 0.07;
-const LINK_SIZE = 0.03;
+const NODE_SIZE = 0.08;
+const LINK_SIZE = 0.02;
 const NODE_OPACITY = 1.0;
-const LINK_OPACITY = 0.8;
+const LINK_OPACITY = 0.7;
 
 const HYPERPLANE = 2;
 
@@ -99,9 +99,9 @@ function fourDtoV3(x, y, z, w, rotations) {
 
 class FourDShape extends THREE.Group {
 
-	constructor(node_m, link_m, structure) {
+	constructor(node_ms, link_m, structure) {
 		super();
-		this.node_m = node_m;
+		this.node_ms = node_ms;
 		this.link_m = link_m;
 		this.nodes4 = structure.nodes;
 		this.nodes3 = {};
@@ -109,9 +109,9 @@ class FourDShape extends THREE.Group {
 		this.initShapes();
 	}
 
-	makeNode(v3) {
+	makeNode(material, v3) {
 		const geometry = new THREE.SphereGeometry(NODE_SIZE);
-		const sphere = new THREE.Mesh(geometry, this.node_m);
+		const sphere = new THREE.Mesh(geometry, material);
 		sphere.position.copy(v3);
 		this.add(sphere);
 		return sphere;
@@ -150,9 +150,10 @@ class FourDShape extends THREE.Group {
 	initShapes() {
 		for( const n of this.nodes4 ) {
 			const v3 = fourDtoV3(n.x, n.y, n.z, n.w, []);
+			const material = this.node_ms[n.label];
 			this.nodes3[n.id] = {
 				v3: v3,
-				object: this.makeNode(v3)
+				object: this.makeNode(material, v3)
 			};
 		}
 		for( const l of this.links ) {
@@ -198,17 +199,25 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
+const struct = SHAPES.cell24();
 
+// TODO = automate going from struct labels to colours, this now only
+// works with the 24-cell
 
+const node_ms = {};
 
-const node_m = new THREE.MeshStandardMaterial(
-	{ color: 0x990044 } );
+node_ms["RED"] = new THREE.MeshStandardMaterial( { color: 0x990044 } );
+node_ms["GREEN"] = new THREE.MeshStandardMaterial( { color: 0xffffee } );
+node_ms["BLUE"] = new THREE.MeshStandardMaterial( { color: 0x101010 } );
 
-node_m.roughness = 0.2;
+for( const label in node_ms ) {
+	const node_m = node_ms[label];
+	node_m.roughness = 0.2;
 
-if( NODE_OPACITY < 1.0 ) {
-	node_m.transparent = true;	
-	node_m.opacity = NODE_OPACITY;
+	if( NODE_OPACITY < 1.0 ) {
+		node_m.transparent = true;	
+		node_m.opacity = NODE_OPACITY;
+	}
 }
 
 
@@ -224,32 +233,37 @@ if( LINK_OPACITY < 1.0 ) {
 	link_m.opacity = LINK_OPACITY;
 }
 
-const struct = SHAPES.cell24();
 
-const shape = new FourDShape(node_m, link_m, struct);
+const shape = new FourDShape(node_ms, link_m, struct);
 
 scene.add(shape);
 
 
 camera.position.z = 4;
 
+const dragK = 0.01;
+
 let theta = 0;
 let psi = 0;
 let startX = 0;
 let startY = 0;
+let startX0 = 0;
+let startY0 = 0;
 
 renderer.domElement.addEventListener("mousedown", (event) => {
 	if( event.buttons === 1 ) {
 		startX = event.clientX;
 		startY = event.clientY;
+		startX0 = theta / dragK;
+		startY0 = theta / dragK;
 	}
 })
 
 
 renderer.domElement.addEventListener("mousemove", (event) => {
 	if( event.buttons === 1 ) {
-		theta = (event.clientX - startX) * 0.01;
-		psi = (event.clientY - startY) * 0.01;
+		theta = (event.clientX - startX + startX0) * dragK;
+		psi = (event.clientY - startY + startY0) * dragK;
 	}
 })
 
@@ -260,7 +274,7 @@ const rotation = new THREE.Matrix4();
 function animate() {
 	requestAnimationFrame( animate );
 
-	const rotations = [rotYZ(theta), rotXW(psi)];
+	const rotations = [rotYZ(theta), rotXZ(psi)];
 	shape.render3(rotations);
 
 	renderer.render( scene, camera );

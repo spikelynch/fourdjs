@@ -124,6 +124,14 @@ export const TESSERACT = {
 	]
 };
 
+// this was done manually and I'm not sure if it's right
+
+const CELL24_INDEXING = {
+	x: { y: 'RED', z: 'BLUE', w: 'GREEN' },
+	y: { z: 'GREEN', w: 'BLUE' },
+	z: { w: 'RED' } 
+};
+
 function make_24cell_vertices() {
 	const axes = [ 'x', 'y', 'z', 'w' ];
 	const nodes = [];
@@ -132,9 +140,14 @@ function make_24cell_vertices() {
 		for ( let q = p + 1; q < 4; q++ ) {
 			const a1 = axes[p];
 			const a2 = axes[q];
+			const label = CELL24_INDEXING[a1][a2];
 			for ( const v1 of [ -1, 1 ] ) {
 				for ( const v2 of [ -1, 1 ] ) {
-					const node = { id: i, x: 0, y: 0, z: 0, w:0 };
+					const node = {
+						id: i,
+						x: 0, y: 0, z: 0, w:0,
+						label: label
+					};
 					node[a1] = v1;
 					node[a2] = v2;
 					nodes.push(node);
@@ -177,6 +190,6 @@ export const cell24 = () => {
 	const nodes = make_24cell_vertices();
 	const links = make_24cell_edges(nodes);
 
-	return { nodes: nodes, links: links };
+	return { nodes: nodes, links: links, labels: [ "RED", "GREEN", "BLUE" ] };
 }
 
