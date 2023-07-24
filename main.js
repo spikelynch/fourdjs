@@ -192,7 +192,6 @@ scene.add(amblight);
 scene.background = new THREE.Color(0xdddddd);
 
 const renderer = new THREE.WebGLRenderer({antialias: true});
-//renderer.physicallyCorrectLights = true;
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
@@ -210,9 +209,9 @@ link_m.roughness = 0.0;
 link_m.transparent = true;
 link_m.opacity = 0.5;
 
-console.log(SHAPES.TESSERACT);
+const struct = SHAPES.cell24();
 
-const shape = new FourDShape(node_m, link_m, SHAPES.TESSERACT);
+const shape = new FourDShape(node_m, link_m, struct);
 
 scene.add(shape);
 

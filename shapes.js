@@ -124,4 +124,28 @@ export const TESSERACT = {
 	]
 };
 
+export const cell24 = () => {
+	const structure = {
+		nodes: [],
+		links: []
+	};
+	const axes = [ 'x', 'y', 'z', 'w' ];
+	let i = 1;
+	for ( let p = 0; p < 3; p++ ) {
+		for ( let q = p + 1; q < 4; q++ ) {
+			const a1 = axes[p];
+			const a2 = axes[q];
+			for ( const v1 of [ -1, 1 ] ) {
+				for ( const v2 of [ -1, 1 ] ) {
+					const node = { id: i, x: 0, y: 0, z: 0, w:0 };
+					node[a1] = v1;
+					node[a2] = v2;
+					structure.nodes.push(node);
+					i++;
+				}
+			}
+		}
+	}
+	return structure;
+}
 
