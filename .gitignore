@@ -1,3 +1,4 @@
 node_modules/
 dist/
 rsync_iram.sh
+.DS_Store
