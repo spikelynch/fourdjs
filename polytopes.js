@@ -2,13 +2,14 @@
 
 export const cell5 = () => {
 	const r5 = Math.sqrt(5);
+	const r2 = Math.sqrt(2) / 2;
 	return {
 		nodes: [
-	      {id:1, x: 1, y: 1, z: 1, w: -1 / r5 },
-	      {id:2, x: 1, y: -1, z: -1, w: -1 / r5 },
-	      {id:3, x: -1, y: 1, z: -1, w: -1 / r5 },
-	      {id:4, x: -1, y: -1, z: 1, w: -1 / r5 },
-	      {id:5, x: 0, y: 0, z: 0, w: 4 / r5 },
+	      {id:1, x: r2, y: r2, z: r2, w: -r2 / r5 },
+	      {id:2, x: r2, y: -r2, z: -r2, w: -r2 / r5 },
+	      {id:3, x: -r2, y: r2, z: -r2, w: -r2 / r5 },
+	      {id:4, x: -r2, y: -r2, z: r2, w: -r2 / r5 },
+	      {id:5, x: 0, y: 0, z: 0, w: 4 * r2 / r5 },
 		],
 		links: [
 			{ id:1, source:1, target: 2},
@@ -27,66 +28,79 @@ export const cell5 = () => {
 
 
 export const cell16 = () => {
+	const s2 = Math.sqrt(2) * 0.5;
 	return {
 		nodes: [
-			{ id: 1, x: 0, y: -1, z: 0, w: 0 },
-			{ id: 2, x: 0, y: 0, z: -1, w: 0 },
-			{ id: 3, x: -1, y: 0, z: 0, w: 0 },
-			{ id: 4, x: 0, y: 0, z: 1, w: 0 },
-			{ id: 5, x: 1, y: 0, z: 0, w: 0 },
-			{ id: 6, x: 0, y: 1, z: 0, w: 0 },
-			{ id: 7, x: 0, y: 0, z: 0, w: -1 },
-			{ id: 8, x: 0, y: 0, z: 0, w: 1 },
+			{ id: 1,  label: 0, x: -s2, y: -s2, z: -s2, w: -s2 },
+			{ id: 2,  label: 0, x:  s2, y:  s2, z: -s2, w: -s2 },
+			{ id: 3,  label: 0, x:  s2, y: -s2, z:  s2, w: -s2 },
+			{ id: 4,  label: 0, x: -s2, y:  s2, z:  s2, w: -s2 },
+			{ id: 5, label: 0, x:  s2, y: -s2, z: -s2, w:  s2 },
+			{ id: 6, label: 0, x: -s2, y:  s2, z: -s2, w:  s2 },
+			{ id: 7, label: 0, x: -s2, y: -s2, z:  s2, w:  s2 },
+			{ id: 8, label: 0, x:  s2, y:  s2, z:  s2, w:  s2 },
 		],
+
+		// opposite pairs: 1 - 8
+		//                 2 - 7
+		//                 3 - 6
+		//                 4 - 5   .. these don't have edges
+
 		links: [
 			{ id: 1, source: 1, target: 2 },
 			{ id: 2, source: 1, target: 3 },
 			{ id: 3, source: 1, target: 4 },
-			{ id: 4, source: 1, target: 5 },
-			{ id: 5, source: 2, target: 3 },
+			{ id: 4, source: 2, target: 3 },
+			{ id: 5, source: 2, target: 4 },
 			{ id: 6, source: 3, target: 4 },
-			{ id: 7, source: 4, target: 5 },
-			{ id: 8, source: 5, target: 2 },
-			{ id: 9, source: 2, target: 6 },
-			{ id: 10, source: 3, target: 6 },
-			{ id: 11, source: 4, target: 6 },
-			{ id: 12, source: 5, target: 6 },
-			{ id: 13, source: 1, target: 7 },
-			{ id: 14, source: 1, target: 8 },
-			{ id: 15, source: 2, target: 7 },
-			{ id: 16, source: 2, target: 8 },
-			{ id: 17, source: 3, target: 7 },
-			{ id: 18, source: 3, target: 8 },
-			{ id: 19, source: 4, target: 7 },
-			{ id: 20, source: 4, target: 8 },
-			{ id: 21, source: 5, target: 7 },
-			{ id: 22, source: 5, target: 8 },
-			{ id: 23, source: 6, target: 7 },
-			{ id: 24, source: 6, target: 8 },
+
+			{ id: 7, source: 5, target: 6 },
+			{ id: 8, source: 5, target: 7 },
+			{ id: 9, source: 5, target: 8 },
+			{ id: 10, source: 6, target: 7 },
+			{ id: 11, source: 6, target: 8 },
+			{ id: 12, source: 7, target: 8 },
+
+			{ id: 13, source: 1, target: 5 },
+			{ id: 14, source: 1, target: 6 },
+			{ id: 15, source: 1, target: 7 },
+			{ id: 16, source: 2, target: 5 },
+			{ id: 17, source: 2, target: 6 },
+			{ id: 18, source: 2, target: 8 },
+
+			{ id: 19, source: 3, target: 5 },
+			{ id: 20, source: 3, target: 7 },
+			{ id: 21, source: 3, target: 8 },
+			{ id: 22, source: 4, target: 6 },
+			{ id: 23, source: 4, target: 7 },
+			{ id: 24, source: 4, target: 8 },
+
+
 		]
 	}
 };
 
 
 export const tesseract = () => {
+	const s2 = Math.sqrt(2) * 0.5;
 	return {
 		nodes: [
-			{ id: 1,  label: 0, x: -0.5, y: -0.5, z: -0.5, w: -0.5 },
-			{ id: 2,  label: 1, x:  0.5, y: -0.5, z: -0.5, w: -0.5 },
-			{ id: 3,  label: 1, x: -0.5, y:  0.5, z: -0.5, w: -0.5 },
-			{ id: 4,  label: 0, x:  0.5, y:  0.5, z: -0.5, w: -0.5 },
-			{ id: 5,  label: 1, x: -0.5, y: -0.5, z:  0.5, w: -0.5 },
-			{ id: 6,  label: 0, x:  0.5, y: -0.5, z:  0.5, w: -0.5 },
-			{ id: 7,  label: 0, x: -0.5, y:  0.5, z:  0.5, w: -0.5 },
-			{ id: 8,  label: 1, x:  0.5, y:  0.5, z:  0.5, w: -0.5 },
-			{ id: 9,  label: 1, x: -0.5, y: -0.5, z: -0.5, w:  0.5 },
-			{ id: 10, label: 0, x:  0.5, y: -0.5, z: -0.5, w:  0.5 },
-			{ id: 11, label: 0, x: -0.5, y:  0.5, z: -0.5, w:  0.5 },
-			{ id: 12, label: 1, x:  0.5, y:  0.5, z: -0.5, w:  0.5 },
-			{ id: 13, label: 0, x: -0.5, y: -0.5, z:  0.5, w:  0.5 },
-			{ id: 14, label: 1, x:  0.5, y: -0.5, z:  0.5, w:  0.5 },
-			{ id: 15, label: 1, x: -0.5, y:  0.5, z:  0.5, w:  0.5 },
-			{ id: 16, label: 0, x:  0.5, y:  0.5, z:  0.5, w:  0.5 },
+			{ id: 1,  label: 0, x: -s2, y: -s2, z: -s2, w: -s2 },
+			{ id: 2,  label: 1, x:  s2, y: -s2, z: -s2, w: -s2 },
+			{ id: 3,  label: 1, x: -s2, y:  s2, z: -s2, w: -s2 },
+			{ id: 4,  label: 0, x:  s2, y:  s2, z: -s2, w: -s2 },
+			{ id: 5,  label: 1, x: -s2, y: -s2, z:  s2, w: -s2 },
+			{ id: 6,  label: 0, x:  s2, y: -s2, z:  s2, w: -s2 },
+			{ id: 7,  label: 0, x: -s2, y:  s2, z:  s2, w: -s2 },
+			{ id: 8,  label: 1, x:  s2, y:  s2, z:  s2, w: -s2 },
+			{ id: 9,  label: 1, x: -s2, y: -s2, z: -s2, w:  s2 },
+			{ id: 10, label: 0, x:  s2, y: -s2, z: -s2, w:  s2 },
+			{ id: 11, label: 0, x: -s2, y:  s2, z: -s2, w:  s2 },
+			{ id: 12, label: 1, x:  s2, y:  s2, z: -s2, w:  s2 },
+			{ id: 13, label: 0, x: -s2, y: -s2, z:  s2, w:  s2 },
+			{ id: 14, label: 1, x:  s2, y: -s2, z:  s2, w:  s2 },
+			{ id: 15, label: 1, x: -s2, y:  s2, z:  s2, w:  s2 },
+			{ id: 16, label: 0, x:  s2, y:  s2, z:  s2, w:  s2 },
 		],
 		links: [
 			{ id: 1, source: 1, target: 2 },

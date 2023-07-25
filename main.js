@@ -7,7 +7,7 @@ import { FourDShape } from './fourDShape.js';
 import { GUI } from 'lil-gui';
 
 
-
+const DEFAULT_SHAPE = '24-cell';
 
 // hacky stuff for 4d rotations
 
@@ -157,6 +157,8 @@ const STRUCTURES = {
 	'24-cell': POLYTOPES.cell24(),
 };
 
+console.log(STRUCTURES);
+
 let shape = false;
 
 function createShape(name) {
@@ -172,12 +174,12 @@ function createShape(name) {
 
 
 
-createShape('24-cell');
+createShape(DEFAULT_SHAPE);
 
 
 camera.position.z = 4;
 
-const dragK = 0.01;
+const dragK = 0.005;
 
 let theta = 0;
 let psi = 0;
@@ -208,7 +210,7 @@ renderer.domElement.addEventListener("mousemove", (event) => {
 const gui = new GUI();
 
 const gui_params = {
-	shape: '24-cell',
+	shape: DEFAULT_SHAPE,
 	hyperplane: 2,
 	xRotate: 'YW',
 	yRotate: 'XZ',
@@ -218,7 +220,7 @@ gui.add(gui_params, 'shape',
 	[ '5-cell', '16-cell', 'tesseract', '24-cell' ]
 	).onChange(createShape)
 
-gui.add(gui_params, 'hyperplane', 1, 4);
+gui.add(gui_params, 'hyperplane', 1.5, 4);
 gui.add(gui_params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
 gui.add(gui_params, 'yRotate', [ 'XZ', 'XY', 'XW' ]);
 
