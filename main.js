@@ -4,6 +4,7 @@ import * as POLYTOPES from './polytopes.js';
 
 import { FourDShape } from './fourDShape.js';
 
+import { GUI } from 'lil-gui';
 
 
 
@@ -149,12 +150,29 @@ for( const link_m of link_ms ) {
 	}
 }
 
-const struct = POLYTOPES.cell24();
+const STRUCTURES = {
+	'5-cell': POLYTOPES.cell5(),
+	'16-cell': POLYTOPES.cell16(),
+	'tesseract': POLYTOPES.tesseract(),
+	'24-cell': POLYTOPES.cell24(),
+};
+
+let shape = false;
+
+function createShape(name) {
+	if( shape ) {
+		scene.remove(shape);
+	}
+
+	shape = new FourDShape(node_ms, link_ms, STRUCTURES[name]);
+	scene.add(shape);
+
+}
 
 
-const shape = new FourDShape(node_ms, link_ms, struct);
 
-scene.add(shape);
+
+createShape('24-cell');
 
 
 camera.position.z = 4;
@@ -185,6 +203,34 @@ renderer.domElement.addEventListener("mousemove", (event) => {
 	}
 })
 
+// set up GUI
+
+const gui = new GUI();
+
+const gui_params = {
+	shape: '24-cell',
+	hyperplane: 2,
+	xRotate: 'YW',
+	yRotate: 'XZ',
+};
+
+gui.add(gui_params, 'shape',
+	[ '5-cell', '16-cell', 'tesseract', '24-cell' ]
+	).onChange(createShape)
+
+gui.add(gui_params, 'hyperplane', 1, 4);
+gui.add(gui_params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
+gui.add(gui_params, 'yRotate', [ 'XZ', 'XY', 'XW' ]);
+
+const ROTFN = {
+	XY: rotXY,
+	XZ: rotXZ,
+	XW: rotXW,
+	YZ: rotYZ,
+	YW: rotYW,
+	ZW: rotZW,
+};
+
 
 
 const rotation = new THREE.Matrix4();
@@ -192,7 +238,11 @@ const rotation = new THREE.Matrix4();
 function animate() {
 	requestAnimationFrame( animate );
 
-	const rotations = [rotYZ(theta), rotXZ(psi)];
+	const rotations = [
+		ROTFN[gui_params.xRotate](theta), 
+		ROTFN[gui_params.yRotate](psi)
+	];
+	shape.hyperplane = gui_params.hyperplane;
 	shape.render3(rotations);
 
 	renderer.render( scene, camera );

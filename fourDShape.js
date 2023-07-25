@@ -7,15 +7,6 @@ const NODE_SIZE = 0.08;
 const LINK_SIZE = 0.02;
 
 
-function fourDtoV3(x, y, z, w, rotations) {
-	const v4 = new THREE.Vector4(x, y, z, w);
-	for ( const m4 of rotations ) {
-		v4.applyMatrix4(m4);
-	}
-	const k = HYPERPLANE / (HYPERPLANE + v4.w);
-	return new THREE.Vector3(v4.x * k, v4.y * k, v4.z * k);
-}
-
 
 class FourDShape extends THREE.Group {
 
@@ -26,8 +17,11 @@ class FourDShape extends THREE.Group {
 		this.nodes4 = structure.nodes;
 		this.nodes3 = {};
 		this.links = structure.links;
+		this.hyperplane = HYPERPLANE;
 		this.initShapes();
 	}
+
+
 
 	// if a node/link has no label, use the 0th material
 
@@ -77,9 +71,19 @@ class FourDShape extends THREE.Group {
 		link.object.children[0].rotation.x = Math.PI / 2.0;
 	}
 
+	fourDtoV3(x, y, z, w, rotations) {
+		const v4 = new THREE.Vector4(x, y, z, w);
+		for ( const m4 of rotations ) {
+			v4.applyMatrix4(m4);
+		}
+		const k = this.hyperplane / (this.hyperplane + v4.w);
+		return new THREE.Vector3(v4.x * k, v4.y * k, v4.z * k);
+	}
+
+
 	initShapes() {
 		for( const n of this.nodes4 ) {
-			const v3 = fourDtoV3(n.x, n.y, n.z, n.w, []);
+			const v3 = this.fourDtoV3(n.x, n.y, n.z, n.w, []);
 			const material = this.getMaterial(n, this.node_ms);
 			this.nodes3[n.id] = {
 				v3: v3,
@@ -92,9 +96,10 @@ class FourDShape extends THREE.Group {
 		}
 	}
 
+
 	render3(rotations) {
 		for( const n of this.nodes4 ) {
-			const v3 = fourDtoV3(n.x, n.y, n.z, n.w, rotations);
+			const v3 = this.fourDtoV3(n.x, n.y, n.z, n.w, rotations);
 			this.nodes3[n.id].v3 = v3;
 			this.nodes3[n.id].object.position.copy(v3);
 			// could do scaling here
