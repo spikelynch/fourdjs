@@ -31,14 +31,14 @@ export const cell16 = () => {
 	const s2 = Math.sqrt(2) * 0.5;
 	return {
 		nodes: [
-			{ id: 1,  label: 0, x: -s2, y: -s2, z: -s2, w: -s2 },
-			{ id: 2,  label: 0, x:  s2, y:  s2, z: -s2, w: -s2 },
-			{ id: 3,  label: 0, x:  s2, y: -s2, z:  s2, w: -s2 },
-			{ id: 4,  label: 0, x: -s2, y:  s2, z:  s2, w: -s2 },
-			{ id: 5, label: 0, x:  s2, y: -s2, z: -s2, w:  s2 },
-			{ id: 6, label: 0, x: -s2, y:  s2, z: -s2, w:  s2 },
-			{ id: 7, label: 0, x: -s2, y: -s2, z:  s2, w:  s2 },
-			{ id: 8, label: 0, x:  s2, y:  s2, z:  s2, w:  s2 },
+			{ id: 1, x: -s2, y: -s2, z: -s2, w: -s2 },
+			{ id: 2, x:  s2, y:  s2, z: -s2, w: -s2 },
+			{ id: 3, x:  s2, y: -s2, z:  s2, w: -s2 },
+			{ id: 4, x: -s2, y:  s2, z:  s2, w: -s2 },
+			{ id: 5, x:  s2, y: -s2, z: -s2, w:  s2 },
+			{ id: 6, x: -s2, y:  s2, z: -s2, w:  s2 },
+			{ id: 7, x: -s2, y: -s2, z:  s2, w:  s2 },
+			{ id: 8, x:  s2, y:  s2, z:  s2, w:  s2 },
 		],
 
 		// opposite pairs: 1 - 8
@@ -46,34 +46,40 @@ export const cell16 = () => {
 		//                 3 - 6
 		//                 4 - 5   .. these don't have edges
 
+		// label 1 links: 1 / 3 / 8 / 6
+		// label 1 links: 2 / 4 / 7 / 5
+
+		// label 2 links: 1 / 4 / 8 / 5
+		// label 2 links: 2 / 3 / 7 / 6  (??)
+ 
 		links: [
-			{ id: 1, source: 1, target: 2 },
-			{ id: 2, source: 1, target: 3 },
-			{ id: 3, source: 1, target: 4 },
-			{ id: 4, source: 2, target: 3 },
-			{ id: 5, source: 2, target: 4 },
-			{ id: 6, source: 3, target: 4 },
+			{ id: 1, source: 1, target: 2, label: 1 },
+			{ id: 2, source: 1, target: 3, label: 2  },
+			{ id: 3, source: 1, target: 4, label: 3  },
+			{ id: 4, source: 2, target: 3, label: 3  },
+			{ id: 5, source: 2, target: 4, label: 2  },
+			{ id: 6, source: 3, target: 4, label: 1 },
 
-			{ id: 7, source: 5, target: 6 },
-			{ id: 8, source: 5, target: 7 },
-			{ id: 9, source: 5, target: 8 },
-			{ id: 10, source: 6, target: 7 },
-			{ id: 11, source: 6, target: 8 },
-			{ id: 12, source: 7, target: 8 },
+			{ id: 7, source: 5, target: 6, label: 1 },
+			{ id: 8, source: 5, target: 7, label: 2 },
+			{ id: 9, source: 5, target: 8, label: 3 },
+			{ id: 10, source: 6, target: 7, label: 3 },
+			{ id: 11, source: 6, target: 8, label: 2 },
+			{ id: 12, source: 7, target: 8, label: 1 },
 
-			{ id: 13, source: 1, target: 5 },
-			{ id: 14, source: 1, target: 6 },
-			{ id: 15, source: 1, target: 7 },
-			{ id: 16, source: 2, target: 5 },
-			{ id: 17, source: 2, target: 6 },
-			{ id: 18, source: 2, target: 8 },
+			{ id: 13, source: 1, target: 5, label: 3 },
+			{ id: 14, source: 1, target: 6, label: 2 },
+			{ id: 15, source: 1, target: 7, label: 1 },
+			{ id: 16, source: 2, target: 5, label: 2 },
+			{ id: 17, source: 2, target: 6, label: 3 },
+			{ id: 18, source: 2, target: 8, label: 1 },
 
-			{ id: 19, source: 3, target: 5 },
-			{ id: 20, source: 3, target: 7 },
-			{ id: 21, source: 3, target: 8 },
-			{ id: 22, source: 4, target: 6 },
-			{ id: 23, source: 4, target: 7 },
-			{ id: 24, source: 4, target: 8 },
+			{ id: 19, source: 3, target: 5, label: 1 },
+			{ id: 20, source: 3, target: 7, label: 3 },
+			{ id: 21, source: 3, target: 8, label: 2 },
+			{ id: 22, source: 4, target: 6, label: 1 },
+			{ id: 23, source: 4, target: 7, label: 2 },
+			{ id: 24, source: 4, target: 8, label: 3 },
 
 
 		]
@@ -85,22 +91,22 @@ export const tesseract = () => {
 	const s2 = Math.sqrt(2) * 0.5;
 	return {
 		nodes: [
-			{ id: 1,  label: 0, x: -s2, y: -s2, z: -s2, w: -s2 },
-			{ id: 2,  label: 1, x:  s2, y: -s2, z: -s2, w: -s2 },
-			{ id: 3,  label: 1, x: -s2, y:  s2, z: -s2, w: -s2 },
-			{ id: 4,  label: 0, x:  s2, y:  s2, z: -s2, w: -s2 },
-			{ id: 5,  label: 1, x: -s2, y: -s2, z:  s2, w: -s2 },
-			{ id: 6,  label: 0, x:  s2, y: -s2, z:  s2, w: -s2 },
-			{ id: 7,  label: 0, x: -s2, y:  s2, z:  s2, w: -s2 },
-			{ id: 8,  label: 1, x:  s2, y:  s2, z:  s2, w: -s2 },
-			{ id: 9,  label: 1, x: -s2, y: -s2, z: -s2, w:  s2 },
-			{ id: 10, label: 0, x:  s2, y: -s2, z: -s2, w:  s2 },
-			{ id: 11, label: 0, x: -s2, y:  s2, z: -s2, w:  s2 },
-			{ id: 12, label: 1, x:  s2, y:  s2, z: -s2, w:  s2 },
-			{ id: 13, label: 0, x: -s2, y: -s2, z:  s2, w:  s2 },
-			{ id: 14, label: 1, x:  s2, y: -s2, z:  s2, w:  s2 },
-			{ id: 15, label: 1, x: -s2, y:  s2, z:  s2, w:  s2 },
-			{ id: 16, label: 0, x:  s2, y:  s2, z:  s2, w:  s2 },
+			{ id: 1,  label: 1, x: -s2, y: -s2, z: -s2, w: -s2 },
+			{ id: 2,  label: 2, x:  s2, y: -s2, z: -s2, w: -s2 },
+			{ id: 3,  label: 2, x: -s2, y:  s2, z: -s2, w: -s2 },
+			{ id: 4,  label: 1, x:  s2, y:  s2, z: -s2, w: -s2 },
+			{ id: 5,  label: 2, x: -s2, y: -s2, z:  s2, w: -s2 },
+			{ id: 6,  label: 1, x:  s2, y: -s2, z:  s2, w: -s2 },
+			{ id: 7,  label: 1, x: -s2, y:  s2, z:  s2, w: -s2 },
+			{ id: 8,  label: 2, x:  s2, y:  s2, z:  s2, w: -s2 },
+			{ id: 9,  label: 2, x: -s2, y: -s2, z: -s2, w:  s2 },
+			{ id: 10, label: 1, x:  s2, y: -s2, z: -s2, w:  s2 },
+			{ id: 11, label: 1, x: -s2, y:  s2, z: -s2, w:  s2 },
+			{ id: 12, label: 2, x:  s2, y:  s2, z: -s2, w:  s2 },
+			{ id: 13, label: 1, x: -s2, y: -s2, z:  s2, w:  s2 },
+			{ id: 14, label: 2, x:  s2, y: -s2, z:  s2, w:  s2 },
+			{ id: 15, label: 2, x: -s2, y:  s2, z:  s2, w:  s2 },
+			{ id: 16, label: 1, x:  s2, y:  s2, z:  s2, w:  s2 },
 		],
 		links: [
 			{ id: 1, source: 1, target: 2 },
@@ -145,17 +151,17 @@ export const tesseract = () => {
 // this was done manually and I'm not sure if it's right
 
 const CELL24_INDEXING = {
-	x: { y: 0, z: 2, w: 1 },
-	y: { z: 1, w: 2 },
-	z: { w: 0 },
+	x: { y: 1, z: 3, w: 2 },
+	y: { z: 2, w: 3 },
+	z: { w: 1 },
 };
 
 // note that this depends on the colour mapping in main.js, yuck
 
 const CELL24_LINK_INDEXING = {
-	0: { 1: 0, 2: 2 },
-	1: { 0: 0, 2: 1 },
-	2: { 0: 2, 1: 1 },
+	1: { 2: 1, 3: 3 },
+	2: { 1: 1, 3: 2 },
+	3: { 1: 3, 2: 2 },
 }
 
 function make_24cell_vertices() {

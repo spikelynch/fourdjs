@@ -7,7 +7,7 @@ import { FourDShape } from './fourDShape.js';
 import { GUI } from 'lil-gui';
 
 
-const DEFAULT_SHAPE = '24-cell';
+const DEFAULT_SHAPE = '16-cell';
 
 // hacky stuff for 4d rotations
 
@@ -120,6 +120,7 @@ const LINK_OPACITY = 0.7;
 // 2 M    2 (0-2) B
 
 const node_ms = [
+	new THREE.MeshStandardMaterial( { color: 0x707070 } ),
 	new THREE.MeshStandardMaterial( { color: 0x20dddd } ),
 	new THREE.MeshStandardMaterial( { color: 0xdddd20 } ),
 	new THREE.MeshStandardMaterial( { color: 0xdd20dd } ),
@@ -135,6 +136,7 @@ for( const node_m of node_ms ) {
 }
 
 const link_ms = [
+	new THREE.MeshStandardMaterial( { color: 0xeeeeee } ),
 	new THREE.MeshStandardMaterial( { color: 0x20dd20 } ),
 	new THREE.MeshStandardMaterial( { color: 0xdd2020 } ),
 	new THREE.MeshStandardMaterial( { color: 0x2020dd } ),
