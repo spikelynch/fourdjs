@@ -252,10 +252,10 @@ function make_120cell_vertices() {
 	const phi2inv = 1 / phi2;  
 
 	const nodes = [
-		PERMUTE.coordinates([2, 2, 0, 0],  0),
-		PERMUTE.coordinates([r5, 1, 1, 1], 1),
+		PERMUTE.coordinates([0, 0, 2, 2],  0),
+		PERMUTE.coordinates([1, 1, 1, r5], 1),
 		PERMUTE.coordinates([phi, phi, phi, phi2inv], 2),
-		PERMUTE.coordinates([phi, phiinv, phiinv, phiinv], 0),
+		PERMUTE.coordinates([phiinv, phiinv, phiinv, phi2], 0),
 
 		PERMUTE.coordinates([phi2, phi2inv, 1, 0], 1, true),
 		PERMUTE.coordinates([r5, phiinv, phi, 0], 2, true),

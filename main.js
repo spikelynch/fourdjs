@@ -120,7 +120,7 @@ const LINK_OPACITY = 0.7;
 // 2 M    2 (0-2) B
 
 const node_ms = [
-	new THREE.MeshStandardMaterial( { color: 0xc0c0c0 } ),
+	new THREE.MeshStandardMaterial( { color: 0xc0c0ff } ),
 	new THREE.MeshStandardMaterial( { color: 0x20dddd } ),
 	new THREE.MeshStandardMaterial( { color: 0xdddd20 } ),
 	new THREE.MeshStandardMaterial( { color: 0xdd20dd } ),
@@ -136,7 +136,7 @@ for( const node_m of node_ms ) {
 }
 
 const link_ms = [
-	new THREE.MeshStandardMaterial( { color: 0xeeeeee } ),
+	new THREE.MeshStandardMaterial( { color: 0xc0c0ff } ),
 	new THREE.MeshStandardMaterial( { color: 0x20dd20 } ),
 	new THREE.MeshStandardMaterial( { color: 0xdd2020 } ),
 	new THREE.MeshStandardMaterial( { color: 0x2020dd } ),
