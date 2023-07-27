@@ -3,8 +3,8 @@ import * as THREE from 'three';
 
 const HYPERPLANE = 2;
 
-const NODE_SIZE = 0.02;
-const LINK_SIZE = 0.02;
+const NODE_SIZE = 0.01;
+const LINK_SIZE = 0.01;
 
 
 
