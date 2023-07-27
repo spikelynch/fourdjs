@@ -1,4 +1,5 @@
 
+import * as PERMUTE from './permute.js';
 
 export const cell5 = () => {
 	const r5 = Math.sqrt(5);
@@ -227,5 +228,42 @@ export const cell24 = () => {
 		nodes: nodes,
 		links: links
 	};
+}
+
+
+function make_120cell_vertices() {
+	const phi = 0.5 * (1 + Math.sqrt(5));  3
+	const r5 = Math.sqrt(5);   5
+	const phi2 = phi * phi;    4
+	const phiinv = 1 / phi;    6
+	const phi2inv = 1 / phi2;  7
+
+	const nodes = [
+		PERMUTE.coordinates([2, 2, 0, 0]),
+		PERMUTE.coordinates([r5, 1, 1, 1]),
+		PERMUTE.coordinates([phi, phi, phi, phi2inv]),
+		PERMUTE.coordinates([phi, phiinv, phiinv, phiinv]),
+
+		PERMUTE.coordinates([phi2, phi2inv, 1, 0], true),
+		PERMUTE.coordinates([r5, phiinv, phi, 0], true),
+		PERMUTE.coordinates([2, 1, phi, phiinv], true),
+		].flat();
+	let i = 1;
+	for( const n of nodes ) {
+		n["id"] = i;
+		i++;
+	}
+	return nodes;
+}
+
+
+
+export const cell120 = () => {
+	const nodes  = make_120cell_vertices();
+
+	return {
+		nodes: nodes,
+		links: []
+	}
 }
 

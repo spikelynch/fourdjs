@@ -28,14 +28,31 @@ function pandita(a) {
 	return false;
 }
 
+function permutations_old(a) {
+	a.sort();
+	const ps = [ [...a] ];
+	let running = true;
+	while( running ) {
+		const s = pandita(a);
+		if( s ) {
+			ps.push([...a]);
+		} else {
+			running = false;
+		}
+	}
+	return ps;
+}
+
 function permutations(a) {
 	a.sort();
 	const ps = [ [...a] ];
-	while( pandita(a) ) {
+	let running = true;
+	while( pandita(a) > 0 ) {
 		ps.push([...a]);
 	}
 	return ps;
 }
+
 
 function permutations_even(a) {
 	a.sort();
@@ -62,6 +79,37 @@ function permutations_even(a) {
 		}
 	}
 	return ps;
+}
+
+// for a given permutation, say [ 1, 1, 0, 0 ], return all
+// of the valid changes of sign, so:
+// [ [1, 1, 0, 0 ], [ -1, 1, 0, 0 ], [ 1, -1, 0, 0 ], [-1, -1, 0, 0 ]]
+// ie don't do it on the zeros
+
+function expand_sign(a) {
+	const expanded = [];
+	const exv = a.map((v) => v ? [ -v, v ] : [ 0 ]);
+	for( const xv of exv[0] ) {
+		for( const yv of exv[1] ) {
+			for( const zv of exv[2] ) {
+				for( const wv of exv[3] ) {
+					expanded.push({x: xv, y:yv, z:zv, w:wv});
+				}
+			}
+		}
+	}
+	return expanded;
+}
+
+
+export function coordinates(a, even=false) {
+	const ps = even ? permutations_even(a) : permutations(a);
+	const coords = [];
+	for( const p of ps ) {
+		const expanded = expand_sign(p);
+		coords.push(...expanded);
+	}
+	return coords;
 }
 
 
