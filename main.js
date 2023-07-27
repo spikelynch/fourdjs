@@ -94,6 +94,10 @@ const light = new THREE.PointLight(0xffffff, 2);
 light.position.set(10, 10, 10);
 scene.add(light);
 
+const light2 = new THREE.PointLight(0xffffff, 2);
+light2.position.set(-10, 5, 10);
+scene.add(light);
+
 
 const amblight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(amblight);
