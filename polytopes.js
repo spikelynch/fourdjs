@@ -244,6 +244,41 @@ export const cell24 = () => {
 }
 
 
+// above ^^ fix me convert to new style
+
+function dist2(n1, n2) {
+	return (n1.x - n2.x) ** 2 + (n1.y - n2.y) ** 2 + (n1.z - n2.z) ** 2 + (n1.w - n2.w) ** 2;
+}
+
+
+
+function auto_detect_edges(nodes, neighbours) {
+	const seen = {};
+	const nnodes = nodes.length;
+	const links = [];
+	let id = 1;
+	for( const n1 of nodes ) {
+		const d2 = [];
+		for( const n2 of nodes ) {
+			d2.push({ d2: dist2(n1, n2), id: n2.id });
+		}
+		d2.sort((a, b) => a.d2 - b.d2);
+		const closest = d2.slice(1, neighbours + 1);
+		for( const e of closest ) {
+			const ids = [ n1.id, e.id ];
+			ids.sort();
+			const fp = ids.join(',');
+			if( !seen[fp] ) {
+				seen[fp] = true;
+				links.push({ id: id, label: 0, source: n1.id, target: e.id });
+				id++;
+			}
+		}
+	}
+	return links;
+}
+
+
 function make_120cell_vertices() {
 	const phi = 0.5 * (1 + Math.sqrt(5));  
 	const r5 = Math.sqrt(5);   
@@ -265,42 +300,9 @@ function make_120cell_vertices() {
 }
 
 
-function dist2(n1, n2) {
-	return (n1.x - n2.x) ** 2 + (n1.y - n2.y) ** 2 + (n1.z - n2.z) ** 2 + (n1.w - n2.w) ** 2;
-}
-
-
-function make_120cell_edges(nodes) {
-	const seen = {};
-	const nnodes = nodes.length;
-	const links = [];
-	let id = 1;
-	for( const n1 of nodes ) {
-		console.log(n1);
-		const d2 = [];
-		for( const n2 of nodes ) {
-			d2.push({ d2: dist2(n1, n2), id: n2.id });
-		}
-		d2.sort((a, b) => a.d2 - b.d2);
-		const closest = d2.slice(1, 5);
-		for( const e of closest ) {
-			const ids = [ n1.id, e.id ];
-			ids.sort();
-			const fp = ids.join(',');
-			if( !seen[fp] ) {
-				seen[fp] = true;
-				links.push({ id: id, label: 0, source: n1.id, target: e.id });
-				id++;
-			}
-		}
-	}
-	return links;
-}
-
-
 export const cell120 = () => {
 	const nodes  = make_120cell_vertices();
-	const links = make_120cell_edges(nodes);
+	const links = auto_detect_edges(nodes, 4);
 	return {
 		nodes: nodes,
 		links: links
@@ -308,4 +310,28 @@ export const cell120 = () => {
 }
 
 
-const nodes = cell120();
+function make_600cell_vertices() {
+	const phi = 0.5 * (1 + Math.sqrt(5));  
+
+	const nodes = [
+		PERMUTE.coordinates([0, 0, 0, 2],  0),
+		PERMUTE.coordinates([1, 1, 1, 1], 1),
+
+		PERMUTE.coordinates([phi, 1, 1 / phi, 0], 1, true)
+		].flat();
+	return scale_and_index(nodes, 0.75);
+}
+
+
+export const cell600 = () => {
+	const nodes  = make_600cell_vertices();
+	const links = auto_detect_edges(nodes, 20);
+	return {
+		nodes: nodes,
+		links: links
+	}
+}
+
+
+
+

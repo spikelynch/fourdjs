@@ -157,10 +157,10 @@ const STRUCTURES = {
 	'16-cell': POLYTOPES.cell16(),
 	'tesseract': POLYTOPES.tesseract(),
 	'24-cell': POLYTOPES.cell24(),
-	'120-cell': POLYTOPES.cell120()
+	'120-cell': POLYTOPES.cell120(),
+	'600-cell': POLYTOPES.cell600()
 };
 
-console.log(STRUCTURES);
 
 let shape = false;
 
@@ -168,7 +168,6 @@ function createShape(name) {
 	if( shape ) {
 		scene.remove(shape);
 	}
-	console.log(STRUCTURES[name]);
 	shape = new FourDShape(node_ms, link_ms, STRUCTURES[name]);
 	scene.add(shape);
 
@@ -220,7 +219,7 @@ const gui_params = {
 };
 
 gui.add(gui_params, 'shape',
-	[ '5-cell', '16-cell', 'tesseract', '24-cell', '120-cell' ]
+	[ '5-cell', '16-cell', 'tesseract', '24-cell', '120-cell', '600-cell' ]
 	).onChange(createShape)
 
 gui.add(gui_params, 'hyperplane', 1.5, 4);
