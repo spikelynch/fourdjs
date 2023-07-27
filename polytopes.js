@@ -78,7 +78,7 @@ export const cell16 = () => {
 	scale_and_index(nodes, 0.75);
 	console.log('cell16 auto_detect_edges');
 	console.log(nodes);
-	const links = auto_detect_edges(nodes, 8);
+	const links = auto_detect_edges(nodes, 6);
 
 	return {
 		nodes: nodes,
