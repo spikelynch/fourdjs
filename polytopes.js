@@ -1,6 +1,19 @@
 
 import * as PERMUTE from './permute.js';
 
+function scale_and_index(nodes, scale) {
+	let i = 1;
+	for( const n of nodes ) {
+		n["id"] = i;
+		i++;
+		for( const a of [ 'x', 'y', 'z', 'w' ] ) {
+			n[a] = scale * n[a];
+		}
+	}
+	return nodes;
+}
+
+
 export const cell5 = () => {
 	const r5 = Math.sqrt(5);
 	const r2 = Math.sqrt(2) / 2;
@@ -232,38 +245,67 @@ export const cell24 = () => {
 
 
 function make_120cell_vertices() {
-	const phi = 0.5 * (1 + Math.sqrt(5));  3
-	const r5 = Math.sqrt(5);   5
-	const phi2 = phi * phi;    4
-	const phiinv = 1 / phi;    6
-	const phi2inv = 1 / phi2;  7
+	const phi = 0.5 * (1 + Math.sqrt(5));  
+	const r5 = Math.sqrt(5);   
+	const phi2 = phi * phi;    
+	const phiinv = 1 / phi;    
+	const phi2inv = 1 / phi2;  
 
 	const nodes = [
-		PERMUTE.coordinates([2, 2, 0, 0]),
-		PERMUTE.coordinates([r5, 1, 1, 1]),
-		PERMUTE.coordinates([phi, phi, phi, phi2inv]),
-		PERMUTE.coordinates([phi, phiinv, phiinv, phiinv]),
+		PERMUTE.coordinates([2, 2, 0, 0],  0),
+		PERMUTE.coordinates([r5, 1, 1, 1], 1),
+		PERMUTE.coordinates([phi, phi, phi, phi2inv], 2),
+		PERMUTE.coordinates([phi, phiinv, phiinv, phiinv], 0),
 
-		PERMUTE.coordinates([phi2, phi2inv, 1, 0], true),
-		PERMUTE.coordinates([r5, phiinv, phi, 0], true),
-		PERMUTE.coordinates([2, 1, phi, phiinv], true),
+		PERMUTE.coordinates([phi2, phi2inv, 1, 0], 1, true),
+		PERMUTE.coordinates([r5, phiinv, phi, 0], 2, true),
+		PERMUTE.coordinates([2, 1, phi, phiinv], 0, true),
 		].flat();
-	let i = 1;
-	for( const n of nodes ) {
-		n["id"] = i;
-		i++;
-	}
-	return nodes;
+	return scale_and_index(nodes, 0.5);
 }
 
+
+function dist2(n1, n2) {
+	return (n1.x - n2.x) ** 2 + (n1.y - n2.y) ** 2 + (n1.z - n2.z) ** 2 + (n1.w - n2.w) ** 2;
+}
+
+
+function make_120cell_edges(nodes) {
+	const seen = {};
+	const nnodes = nodes.length;
+	const links = [];
+	let id = 1;
+	for( const n1 of nodes ) {
+		console.log(n1);
+		const d2 = [];
+		for( const n2 of nodes ) {
+			d2.push({ d2: dist2(n1, n2), id: n2.id });
+		}
+		d2.sort((a, b) => a.d2 - b.d2);
+		const closest = d2.slice(1, 5);
+		for( const e of closest ) {
+			const ids = [ n1.id, e.id ];
+			ids.sort();
+			const fp = ids.join(',');
+			if( !seen[fp] ) {
+				seen[fp] = true;
+				links.push({ id: id, label: 0, source: n1.id, target: e.id });
+				id++;
+			}
+		}
+	}
+	return links;
+}
 
 
 export const cell120 = () => {
 	const nodes  = make_120cell_vertices();
-
+	const links = make_120cell_edges(nodes);
 	return {
 		nodes: nodes,
-		links: []
+		links: links
 	}
 }
 
+
+const nodes = cell120();
