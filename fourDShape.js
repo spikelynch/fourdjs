@@ -10,13 +10,15 @@ const LINK_SIZE = 0.01;
 
 class FourDShape extends THREE.Group {
 
-	constructor(node_ms, link_ms, structure) {
+	constructor(node_ms, link_ms, face_ms, structure) {
 		super();
 		this.node_ms = node_ms;
 		this.link_ms = link_ms;
+		this.face_ms = face_ms;
 		this.nodes4 = structure.nodes;
 		this.nodes3 = {};
 		this.links = structure.links;
+		this.faces = ( "faces" in structure ) ? structure.faces : [];
 		this.hyperplane = HYPERPLANE;
 		this.initShapes();
 	}
@@ -71,6 +73,32 @@ class FourDShape extends THREE.Group {
 		link.object.children[0].rotation.x = Math.PI / 2.0;
 	}
 
+
+	setFaceGeometry(face, geometry) {
+		const values = [];
+		for( const f of face.nodes ) {
+			const v3 = this.nodes3[f].v3;
+			values.push(v3.x);
+			values.push(v3.y);
+			values.push(v3.z);
+		}
+		const v3 = this.nodes3[face.nodes[0]].v3;
+		values.push(v3.x);
+		values.push(v3.y);
+		values.push(v3.z);
+		const vertices = new Float32Array(values);
+		geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+	}
+
+	makeFace(material, face) {
+		const geometry = new THREE.BufferGeometry();
+		this.setFaceGeometry(face, geometry)
+		const mesh = new THREE.Mesh( geometry, material );
+		this.add(mesh);
+		return mesh;
+	}
+
+
 	fourDtoV3(x, y, z, w, rotations) {
 		const v4 = new THREE.Vector4(x, y, z, w);
 		for ( const m4 of rotations ) {
@@ -94,6 +122,10 @@ class FourDShape extends THREE.Group {
 			const material = this.getMaterial(l, this.link_ms);
 			l.object = this.makeLink(material, l);
 		}
+		// for( const f of this.faces ) {
+		// 	const material = this.getMaterial(f, this.face_ms);
+		// 	f.object = this.makeFace(material, f);
+		// }
 	}
 
 
@@ -108,6 +140,10 @@ class FourDShape extends THREE.Group {
 		for( const l of this.links ) {
 			this.updateLink(l);
 		}
+
+		// for( const f of this.faces ) {
+		// 	this.setFaceGeometry(f, f.object.geometry);
+		// }
 	}
 
 

@@ -112,6 +112,7 @@ document.body.appendChild( renderer.domElement );
 
 const NODE_OPACITY = 1.0;
 const LINK_OPACITY = 1.0;
+const FACE_OPACITY = 0.2;
 
 const node_ms = [
 	new THREE.MeshStandardMaterial( { color: 0x90ebff } )
@@ -140,6 +141,17 @@ for( const link_m of link_ms ) {
 	}
 }
 
+
+const face_ms = [
+	new THREE.MeshLambertMaterial( { color: 0x44ff44 } )
+	];
+
+for( const face_m of face_ms ) {
+	face_m.transparent = true;	
+	face_m.opacity = FACE_OPACITY;
+}
+
+
 const STRUCTURES = {
 	'5-cell': POLYTOPES.cell5(),
 	'16-cell': POLYTOPES.cell16(),
@@ -156,7 +168,8 @@ function createShape(name) {
 	if( shape ) {
 		scene.remove(shape);
 	}
-	shape = new FourDShape(node_ms, link_ms, STRUCTURES[name]);
+	console.log(STRUCTURES[name]);
+	shape = new FourDShape(node_ms, link_ms, face_ms, STRUCTURES[name]);
 	scene.add(shape);
 
 }
