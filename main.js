@@ -7,7 +7,7 @@ import { FourDShape } from './fourDShape.js';
 import { GUI } from 'lil-gui';
 
 
-const DEFAULT_SHAPE = '5-cell';
+const DEFAULT_SHAPE = '120-cell';
 
 // hacky stuff for 4d rotations
 
