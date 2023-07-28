@@ -83,6 +83,43 @@ function rotXY(theta) {
 
 
 
+function fallbackCopyTextToClipboard(text) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  
+  // Avoid scrolling to bottom
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.position = "fixed";
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    console.log('Fallback: Copying text command was ' + msg);
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+  }
+
+  document.body.removeChild(textArea);
+}
+
+
+function copyTextToClipboard(text) {
+ 	if (!navigator.clipboard) {
+    	fallbackCopyTextToClipboard(text);
+    	return;
+  	}
+  	navigator.clipboard.writeText(text).then(function() {
+    	console.log('Async: Copying to clipboard was successful!');
+  	}, function(err) {
+    	console.error('Async: Could not copy text: ', err);
+  	});
+}
+
 
 
 
@@ -162,9 +199,16 @@ function createShape(name) {
 }
 
 
-
-
-createShape(DEFAULT_SHAPE);
+function floatParam(linkUrl, param) {
+	const value = linkUrl.searchParams(param);
+	if( value ) {
+		const fl = parseFloat(value);
+		if( fl !== NaN ) {
+			return fl;
+		}
+	}
+	return 0;
+}
 
 
 camera.position.z = 4;
@@ -213,13 +257,31 @@ renderer.domElement.addEventListener("pointerup", (event) => {
 
 const gui = new GUI();
 
+const linkUrl = new URL(window.location.toLocaleString());
+
+const linkparams = {};
+
 const gui_params = {
 	shape: DEFAULT_SHAPE,
 	hyperplane: 2,
 	xRotate: 'YW',
 	yRotate: 'XZ',
-	damping: false
+	damping: false,
+	copylink: function () {
+		const url = 
+	}
 };
+
+for( const param in [ "shape", "hyperplane", "xRotate", "yRotate", "damping" ]) {
+	const value = linkUrl.searchParams(param);
+	if( value ) {
+		gui_params[param] = value;
+	}
+}
+
+dpsi = floatParam(linkUrl, 'dpsi');
+dtheta = floatParam(linkUrl, 'dtheta');
+
 
 gui.add(gui_params, 'shape',
 	[ '5-cell', '16-cell', 'tesseract', '24-cell', '120-cell', '600-cell' ]
@@ -229,6 +291,7 @@ gui.add(gui_params, 'hyperplane', 1.5, 4);
 gui.add(gui_params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
 gui.add(gui_params, 'yRotate', [ 'XZ', 'XY', 'XW' ]);
 gui.add(gui_params, 'damping');
+gui.add()
 
 const ROTFN = {
 	XY: rotXY,
@@ -239,6 +302,9 @@ const ROTFN = {
 	ZW: rotZW,
 };
 
+
+
+createShape(gui_params["shape"]);
 
 
 const rotation = new THREE.Matrix4();
