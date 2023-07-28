@@ -170,6 +170,7 @@ createShape(DEFAULT_SHAPE);
 camera.position.z = 4;
 
 const dragK = 0.005;
+const damping = 0.99;
 
 let theta = 0;
 let psi = 0;
@@ -177,23 +178,35 @@ let theta0 = 0;
 let psi0 = 0;
 let dragx0 = 0;
 let dragy0 = 0;
+let dtheta = 0;
+let dpsi = 0;
+let dragging = false;
 
-renderer.domElement.addEventListener("mousedown", (event) => {
+
+renderer.domElement.addEventListener("pointerdown", (event) => {
 	if( event.buttons === 1 ) {
 		theta0 = theta;
 		psi0 = psi;
 		dragx0 = event.clientX;
 		dragy0 = event.clientY;
+		dragging = true;
 	}
 })
 
-renderer.domElement.addEventListener("mousemove", (event) => {
+renderer.domElement.addEventListener("pointermove", (event) => {
 	if( event.buttons === 1 ) {
-		theta = theta0 + (event.clientX - dragx0) * dragK;
-		psi = psi0 + (event.clientY - dragy0) * dragK;
+		const theta1 = theta0 + (event.clientX - dragx0) * dragK;
+		const psi1 = psi0 + (event.clientY - dragy0) * dragK;
+		dtheta = theta1 - theta;
+		dpsi = psi1 - psi;
+		theta = theta1;
+		psi = psi1;
 	}
 })
 
+renderer.domElement.addEventListener("pointerup", (event) => {
+	dragging = false;
+})
 
 
 // set up GUI
@@ -205,6 +218,7 @@ const gui_params = {
 	hyperplane: 2,
 	xRotate: 'YW',
 	yRotate: 'XZ',
+	damping: false
 };
 
 gui.add(gui_params, 'shape',
@@ -214,6 +228,7 @@ gui.add(gui_params, 'shape',
 gui.add(gui_params, 'hyperplane', 1.5, 4);
 gui.add(gui_params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
 gui.add(gui_params, 'yRotate', [ 'XZ', 'XY', 'XW' ]);
+gui.add(gui_params, 'damping');
 
 const ROTFN = {
 	XY: rotXY,
@@ -230,6 +245,15 @@ const rotation = new THREE.Matrix4();
 
 function animate() {
 	requestAnimationFrame( animate );
+
+	if( ! dragging ) {
+		theta += dtheta;
+		psi += dpsi;
+		if( gui_params.damping ) {
+			dtheta = dtheta * damping;
+			dpsi = dpsi * damping;
+		}
+	}
 
 	const rotations = [
 		ROTFN[gui_params.xRotate](theta), 
