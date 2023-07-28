@@ -173,27 +173,28 @@ const dragK = 0.005;
 
 let theta = 0;
 let psi = 0;
-let startX = 0;
-let startY = 0;
-let startX0 = 0;
-let startY0 = 0;
+let theta0 = 0;
+let psi0 = 0;
+let dragx0 = 0;
+let dragy0 = 0;
 
 renderer.domElement.addEventListener("mousedown", (event) => {
 	if( event.buttons === 1 ) {
-		startX = event.clientX;
-		startY = event.clientY;
-		startX0 = theta / dragK;
-		startY0 = theta / dragK;
+		theta0 = theta;
+		psi0 = psi;
+		dragx0 = event.clientX;
+		dragy0 = event.clientY;
 	}
 })
-
 
 renderer.domElement.addEventListener("mousemove", (event) => {
 	if( event.buttons === 1 ) {
-		theta = (event.clientX - startX + startX0) * dragK;
-		psi = (event.clientY - startY + startY0) * dragK;
+		theta = theta0 + (event.clientX - dragx0) * dragK;
+		psi = psi0 + (event.clientY - dragy0) * dragK;
 	}
 })
+
+
 
 // set up GUI
 
