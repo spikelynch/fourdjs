@@ -28,8 +28,8 @@ document.body.appendChild( renderer.domElement );
 
 // set up colours and materials for gui callbacks
 
-scene.background = new THREE.Color(0xdddddd);
-const material = new THREE.MeshStandardMaterial({ color: 0x90ebff });
+scene.background = new THREE.Color(0x808080);
+const material = new THREE.MeshStandardMaterial({ color: 0x3293a9 });
 
 const node_ms = [ material ];
 

@@ -2,8 +2,8 @@ import { GUI } from 'lil-gui';
 
 
 const DEFAULT_SHAPE = '120-cell';
-const DEFAULT_COLOR = 0x90ebff;
-const DEFAULT_BG = 0xdddddd;
+const DEFAULT_COLOR = 0x3293a9;
+const DEFAULT_BG = 0x808080;
 
 
 
