@@ -83,6 +83,43 @@ function rotXY(theta) {
 
 
 
+function fallbackCopyTextToClipboard(text) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  
+  // Avoid scrolling to bottom
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.position = "fixed";
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    console.log('Fallback: Copying text command was ' + msg);
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+  }
+
+  document.body.removeChild(textArea);
+}
+
+
+function copyTextToClipboard(text) {
+ 	if (!navigator.clipboard) {
+    	fallbackCopyTextToClipboard(text);
+    	return;
+  	}
+  	navigator.clipboard.writeText(text).then(function() {
+    	console.log('Async: Copying to clipboard was successful!');
+  	}, function(err) {
+    	console.error('Async: Could not copy text: ', err);
+  	});
+}
+
 
 
 
@@ -162,9 +199,16 @@ function createShape(name) {
 }
 
 
-
-
-createShape(DEFAULT_SHAPE);
+function floatParam(params, param) {
+	const value = params.get(param);
+	if( value ) {
+		const fl = parseFloat(value);
+		if( fl !== NaN ) {
+			return fl;
+		}
+	}
+	return 0;
+}
 
 
 camera.position.z = 4;
@@ -213,13 +257,43 @@ renderer.domElement.addEventListener("pointerup", (event) => {
 
 const gui = new GUI();
 
+const linkUrl = new URL(window.location.toLocaleString());
+
+const link_params = {};
+
+const urlParams = linkUrl.searchParams;
+for( const param of [ "shape", "xRotate", "yRotate" ]) {
+	const value = urlParams.get(param);
+	if( value ) {
+		link_params[param] = value;
+	}
+}
+
+link_params['hyperplane'] = floatParam(urlParams, 'hyperplane');
+
+dpsi = floatParam(urlParams, 'dpsi');
+dtheta = floatParam(urlParams, 'dtheta');
+
+
 const gui_params = {
-	shape: DEFAULT_SHAPE,
-	hyperplane: 2,
-	xRotate: 'YW',
-	yRotate: 'XZ',
-	damping: false
+	shape: link_params['shape'] || DEFAULT_SHAPE,
+	hyperplane: link_params['hyperplane'] || 2,
+	xRotate: link_params['xRotate'] || 'YW',
+	yRotate: link_params['yRotate'] || 'XZ',
+	damping: false,
+	"copy link": function () {
+		const url = new URL(linkUrl.origin + linkUrl.pathname);
+		url.searchParams.append("shape", gui_params.shape);
+		url.searchParams.append("hyperplane", gui_params.hyperplane.toString());
+		url.searchParams.append("xRotate", gui_params.xRotate);
+		url.searchParams.append("yRotate", gui_params.yRotate);
+		url.searchParams.append("dtheta", dtheta.toString());
+		url.searchParams.append("dpsi", dpsi.toString());
+		copyTextToClipboard(url);
+	}
 };
+
+
 
 gui.add(gui_params, 'shape',
 	[ '5-cell', '16-cell', 'tesseract', '24-cell', '120-cell', '600-cell' ]
@@ -229,6 +303,7 @@ gui.add(gui_params, 'hyperplane', 1.5, 4);
 gui.add(gui_params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
 gui.add(gui_params, 'yRotate', [ 'XZ', 'XY', 'XW' ]);
 gui.add(gui_params, 'damping');
+gui.add(gui_params, 'copy link');
 
 const ROTFN = {
 	XY: rotXY,
@@ -239,6 +314,9 @@ const ROTFN = {
 	ZW: rotZW,
 };
 
+
+
+createShape(gui_params["shape"]);
 
 
 const rotation = new THREE.Matrix4();
