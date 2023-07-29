@@ -67,7 +67,11 @@ export const cell5 = () => {
 			{ id:8, source:3, target: 4},
 			{ id:9, source:3, target: 5},
 			{ id:10, source:4, target: 5},
-		]
+		],
+		geometry: {
+			node_size: 0.05,
+			link_size: 0.05
+		}
 	};
 };
 
@@ -80,7 +84,11 @@ export const cell16 = () => {
 
 	return {
 		nodes: nodes,
-		links: links
+		links: links,
+		geometry: {
+			node_size: 0.03,
+			link_size: 0.03
+		}
 	};
 };
 
@@ -92,7 +100,11 @@ export const tesseract = () => {
 
 	return {
 		nodes: nodes,
-		links: links
+		links: links,
+		geometry: {
+			node_size: 0.03,
+			link_size: 0.03
+		}
 	};
 }
 
@@ -105,7 +117,11 @@ export const cell24 = () => {
 
 	return {
 		nodes: nodes,
-		links: links
+		links: links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		}
 	};
 }
 
@@ -138,7 +154,12 @@ export const cell120 = () => {
 	const links = auto_detect_edges(nodes, 4);
 	return {
 		nodes: nodes,
-		links: links
+		links: links,
+		geometry: {
+			node_size: 0.01,
+			link_size: 0.01
+		}
+
 	}
 }
 
@@ -161,7 +182,11 @@ export const cell600 = () => {
 	const links = auto_detect_edges(nodes, 20);
 	return {
 		nodes: nodes,
-		links: links
+		links: links,
+		geometry: {
+			node_size: 0.003,
+			link_size: 0.003
+		}
 	}
 }
 

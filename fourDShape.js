@@ -3,10 +3,6 @@ import * as THREE from 'three';
 
 const HYPERPLANE = 2;
 
-const NODE_SIZE = 0.01;
-const LINK_SIZE = 0.01;
-
-
 
 class FourDShape extends THREE.Group {
 
@@ -17,6 +13,9 @@ class FourDShape extends THREE.Group {
 		this.nodes4 = structure.nodes;
 		this.nodes3 = {};
 		this.links = structure.links;
+		this.node_size = structure.geometry.node_size;
+		this.link_size = structure.geometry.link_size;
+		this.geom_scale = 1;
 		this.hyperplane = HYPERPLANE;
 		this.initShapes();
 	}
@@ -34,7 +33,7 @@ class FourDShape extends THREE.Group {
 	}
 
 	makeNode(material, v3) {
-		const geometry = new THREE.SphereGeometry(NODE_SIZE);
+		const geometry = new THREE.SphereGeometry(this.node_size);
 		const sphere = new THREE.Mesh(geometry, material);
 		sphere.position.copy(v3);
 		this.add(sphere);
@@ -47,7 +46,7 @@ class FourDShape extends THREE.Group {
 		const length = n1.distanceTo(n2);
 		const centre = new THREE.Vector3();
 		centre.lerpVectors(n1, n2, 0.5);
-		const geometry = new THREE.CylinderGeometry(LINK_SIZE, LINK_SIZE, 1);
+		const geometry = new THREE.CylinderGeometry(this.link_size, this.link_size, 1);
 		const cyl = new THREE.Mesh(geometry, material);
 		const edge = new THREE.Group();
 		edge.add(cyl);
@@ -65,7 +64,7 @@ class FourDShape extends THREE.Group {
 		const length = n1.distanceTo(n2);
 		const centre = new THREE.Vector3();
 		centre.lerpVectors(n1, n2, 0.5);
-		link.object.scale.copy(new THREE.Vector3(1, 1, length));
+		link.object.scale.copy(new THREE.Vector3(this.geom_scale, this.geom_scale, length));
 		link.object.position.copy(centre);
 		link.object.lookAt(n2);
 		link.object.children[0].rotation.x = Math.PI / 2.0;
@@ -98,11 +97,12 @@ class FourDShape extends THREE.Group {
 
 
 	render3(rotations) {
+		this.scalev3 = new THREE.Vector3(this.geom_scale, this.geom_scale, this.geom_scale);
 		for( const n of this.nodes4 ) {
 			const v3 = this.fourDtoV3(n.x, n.y, n.z, n.w, rotations);
 			this.nodes3[n.id].v3 = v3;
 			this.nodes3[n.id].object.position.copy(v3);
-			// could do scaling here
+			this.nodes3[n.id].object.scale.copy(this.scalev3);
 		}
 
 		for( const l of this.links ) {
