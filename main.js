@@ -199,8 +199,8 @@ function createShape(name) {
 }
 
 
-function floatParam(linkUrl, param) {
-	const value = linkUrl.searchParams(param);
+function floatParam(params, param) {
+	const value = params.get(param);
 	if( value ) {
 		const fl = parseFloat(value);
 		if( fl !== NaN ) {
@@ -259,28 +259,40 @@ const gui = new GUI();
 
 const linkUrl = new URL(window.location.toLocaleString());
 
-const linkparams = {};
+const link_params = {};
 
-const gui_params = {
-	shape: DEFAULT_SHAPE,
-	hyperplane: 2,
-	xRotate: 'YW',
-	yRotate: 'XZ',
-	damping: false,
-	copylink: function () {
-		const url = 
-	}
-};
-
-for( const param in [ "shape", "hyperplane", "xRotate", "yRotate", "damping" ]) {
-	const value = linkUrl.searchParams(param);
+const urlParams = linkUrl.searchParams;
+for( const param of [ "shape", "xRotate", "yRotate" ]) {
+	const value = urlParams.get(param);
 	if( value ) {
-		gui_params[param] = value;
+		link_params[param] = value;
 	}
 }
 
-dpsi = floatParam(linkUrl, 'dpsi');
-dtheta = floatParam(linkUrl, 'dtheta');
+link_params['hyperplane'] = floatParam(urlParams, 'hyperplane');
+
+dpsi = floatParam(urlParams, 'dpsi');
+dtheta = floatParam(urlParams, 'dtheta');
+
+
+const gui_params = {
+	shape: link_params['shape'] || DEFAULT_SHAPE,
+	hyperplane: link_params['hyperplane'] || 2,
+	xRotate: link_params['xRotate'] || 'YW',
+	yRotate: link_params['yRotate'] || 'XZ',
+	damping: false,
+	"copy link": function () {
+		const url = new URL(linkUrl.origin + linkUrl.pathname);
+		url.searchParams.append("shape", gui_params.shape);
+		url.searchParams.append("hyperplane", gui_params.hyperplane.toString());
+		url.searchParams.append("xRotate", gui_params.xRotate);
+		url.searchParams.append("yRotate", gui_params.yRotate);
+		url.searchParams.append("dtheta", dtheta.toString());
+		url.searchParams.append("dpsi", dpsi.toString());
+		copyTextToClipboard(url);
+	}
+};
+
 
 
 gui.add(gui_params, 'shape',
@@ -291,7 +303,7 @@ gui.add(gui_params, 'hyperplane', 1.5, 4);
 gui.add(gui_params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
 gui.add(gui_params, 'yRotate', [ 'XZ', 'XY', 'XW' ]);
 gui.add(gui_params, 'damping');
-gui.add()
+gui.add(gui_params, 'copy link');
 
 const ROTFN = {
 	XY: rotXY,

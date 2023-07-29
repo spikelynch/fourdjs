@@ -76,8 +76,6 @@ export const cell16 = () => {
 	let nodes = PERMUTE.coordinates([1, 1, 1, 1],  0);
 	nodes = nodes.filter((n) => n.x * n.y * n.z * n.w > 0);
 	scale_and_index(nodes, 0.75);
-	console.log('cell16 auto_detect_edges');
-	console.log(nodes);
 	const links = auto_detect_edges(nodes, 6);
 
 	return {
