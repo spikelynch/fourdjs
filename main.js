@@ -8,6 +8,12 @@ import { GUI } from 'lil-gui';
 
 
 const DEFAULT_SHAPE = '120-cell';
+const DEFAULT_COLOR = 0x90ebff;
+const DEFAULT_BG = 0xdddddd;
+
+
+
+
 
 // hacky stuff for 4d rotations
 
@@ -139,7 +145,7 @@ scene.add(light);
 const amblight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(amblight);
 
-scene.background = new THREE.Color(0xdddddd);
+scene.background = new THREE.Color(DEFAULT_BG);
 
 
 const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -147,35 +153,13 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 
-const NODE_OPACITY = 1.0;
-const LINK_OPACITY = 1.0;
+const material = new THREE.MeshStandardMaterial(
+	{ color: DEFAULT_COLOR }
+);
 
-const node_ms = [
-	new THREE.MeshStandardMaterial( { color: 0x90ebff } )
-];
+const node_ms = [ material ];
 
-for( const node_m of node_ms ) {
-	node_m.roughness = 0.9;
-
-	if( NODE_OPACITY < 1.0 ) {
-		node_m.transparent = true;	
-		node_m.opacity = NODE_OPACITY;
-	}
-}
-
-const link_ms = [
-	new THREE.MeshStandardMaterial( { color: 0x90ebff } )
-	];
-
-for( const link_m of link_ms ) {
-	link_m.metalness = 0.8;
-	link_m.roughness = 0.1;
-
-	if( LINK_OPACITY < 1.0 ) {
-		link_m.transparent = true;	
-		link_m.opacity = LINK_OPACITY;
-	}
-}
+const link_ms = [ material ];
 
 const STRUCTURES = {
 	'5-cell': POLYTOPES.cell5(),
@@ -208,6 +192,26 @@ function floatParam(params, param) {
 		}
 	}
 	return 0;
+}
+
+function stringtoHex(cstr) {
+	return parseInt('0x' + cstr.substr(1));
+}
+
+function hexToString(hex) {
+	return '#' + hex.toString(16);
+}
+
+
+function colorParam(params, param, dft) {
+	const value = params.get(param);
+	if( value ) {
+		const hex = stringtoHex(value);
+		if( hex !== NaN ) {
+			return hex;
+		}
+	}
+	return dft;
 }
 
 
@@ -270,6 +274,9 @@ for( const param of [ "shape", "xRotate", "yRotate" ]) {
 }
 
 link_params['hyperplane'] = floatParam(urlParams, 'hyperplane');
+link_params['thickness'] = floatParam(urlParams, 'thickness');
+link_params['color'] = colorParam(urlParams, 'color', DEFAULT_COLOR);
+link_params['background'] = colorParam(urlParams, 'background', DEFAULT_BG);
 
 dpsi = floatParam(urlParams, 'dpsi');
 dtheta = floatParam(urlParams, 'dtheta');
@@ -277,6 +284,9 @@ dtheta = floatParam(urlParams, 'dtheta');
 
 const gui_params = {
 	shape: link_params['shape'] || DEFAULT_SHAPE,
+	thickness: link_params['thickness'] || 1,
+	color: link_params['color'] || DEFAULT_COLOR,
+	background: link_params['background'] || DEFAULT_BG,
 	hyperplane: link_params['hyperplane'] || 2,
 	xRotate: link_params['xRotate'] || 'YW',
 	yRotate: link_params['yRotate'] || 'XZ',
@@ -284,6 +294,9 @@ const gui_params = {
 	"copy link": function () {
 		const url = new URL(linkUrl.origin + linkUrl.pathname);
 		url.searchParams.append("shape", gui_params.shape);
+		url.searchParams.append("thickness", gui_params.thickness.toString());
+		url.searchParams.append("color", hexToString(gui_params.color));
+		url.searchParams.append("background", hexToString(gui_params.background));
 		url.searchParams.append("hyperplane", gui_params.hyperplane.toString());
 		url.searchParams.append("xRotate", gui_params.xRotate);
 		url.searchParams.append("yRotate", gui_params.yRotate);
@@ -300,6 +313,15 @@ gui.add(gui_params, 'shape',
 	).onChange(createShape)
 
 gui.add(gui_params, 'hyperplane', 1.5, 4);
+gui.add(gui_params, 'thickness', 0.01, 4);
+gui.addColor(gui_params, 'color').onChange((c) => {
+	console.log(`Setting material colour to ${c}`);
+	material.color = new THREE.Color(c);
+});
+gui.addColor(gui_params, 'background').onChange((c) => {
+	console.log(`Setting background colour to ${c}`);
+	scene.background = new THREE.Color(c);
+});
 gui.add(gui_params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
 gui.add(gui_params, 'yRotate', [ 'XZ', 'XY', 'XW' ]);
 gui.add(gui_params, 'damping');
@@ -338,6 +360,7 @@ function animate() {
 		ROTFN[gui_params.yRotate](psi)
 	];
 	shape.hyperplane = gui_params.hyperplane;
+	shape.geom_scale = gui_params.thickness;
 	shape.render3(rotations);
 
 	renderer.render( scene, camera );
