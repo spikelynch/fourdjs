@@ -65,7 +65,8 @@ const gui = new FourDGUI(
 	(c) => { scene.background = new THREE.Color(c) },
 );
 
-
+material.color = new THREE.Color(gui.params.color);
+scene.background = new THREE.Color(gui.params.background);
 
 const dragK = 0.005;
 const damping = 0.99;

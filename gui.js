@@ -39,6 +39,7 @@ class FourDGUI {
 		this.gui.add(this.params, 'yRotate', [ 'XZ', 'XY', 'XW' ]);
 		this.gui.add(this.params, 'damping');
 		this.gui.add(this.params, 'copy link');
+
 	}	
 
 
