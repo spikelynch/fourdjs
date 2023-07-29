@@ -12,6 +12,7 @@ class FourDGUI {
 	constructor(createShape, setColor, setBackground) {
 		this.gui = new GUI();
 		this.parseLinkParams();
+		const guiObj = this;
 		this.params = {
 			shape: this.link['shape'] || DEFAULT_SHAPE,
 			thickness: this.link['thickness'] || 1,
@@ -21,9 +22,9 @@ class FourDGUI {
 			xRotate: this.link['xRotate'] || 'YW',
 			yRotate: this.link['yRotate'] || 'XZ',
 			damping: false,
-			dtheta: this.link['dtheta'],
-			dpsi: this.link['dpsi'],
-			"copy link": function () { this.copyUrl() }
+			dtheta: this.link['dtheta'] || 0,
+			dpsi: this.link['dpsi'] || 0,
+			"copy link": function () { guiObj.copyUrl() }
 		};
 
 		this.gui.add(this.params, 'shape',
@@ -52,7 +53,7 @@ class FourDGUI {
 		return dft;
 	}
 
-	stringtoHex(cstr) {
+	stringToHex(cstr) {
 		return parseInt('0x' + cstr.substr(1));
 	}
 
@@ -73,32 +74,33 @@ class FourDGUI {
 				this.link[param] = value;
 			}
 		}
-
+		const guiObj = this;
+		console.log(guiObj);
 		this.link['hyperplane'] = this.numParam('hyperplane', parseFloat, 2);
 		this.link['thickness'] = this.numParam('thickness', parseFloat, 1);
 		this.link['color'] = this.numParam(
-			'color', (s) => this.stringToHex(s), DEFAULT_COLOR
+			'color', (s) => guiObj.stringToHex(s), DEFAULT_COLOR
 			);
 		this.link['background'] = this.numParam(
-			'background', (s) => this.stringToHex(s), DEFAULT_BG
+			'background', (s) => guiObj.stringToHex(s), DEFAULT_BG
 			);
 
-		this.link['dpsi'] = this.numParam('dpsi', 0);
-		this.link['dtheta'] = this.numParam('dtheta', 0);
+		this.link['dpsi'] = this.numParam('dpsi', parseFloat, 0);
+		this.link['dtheta'] = this.numParam('dtheta', parseFloat, 0);
 	}
 
 
 	copyUrl() {
-		const url = new URL(linkUrl.origin + linkUrl.pathname);
+		const url = new URL(this.linkUrl.origin + this.linkUrl.pathname);
 		url.searchParams.append("shape", this.params.shape);
 		url.searchParams.append("thickness", this.params.thickness.toString());
-		url.searchParams.append("color", hexToString(this.params.color));
-		url.searchParams.append("background", hexToString(this.params.background));
+		url.searchParams.append("color", this.hexToString(this.params.color));
+		url.searchParams.append("background", this.hexToString(this.params.background));
 		url.searchParams.append("hyperplane", this.params.hyperplane.toString());
 		url.searchParams.append("xRotate", this.params.xRotate);
 		url.searchParams.append("yRotate", this.params.yRotate);
-		url.searchParams.append("dtheta", this.dtheta.toString());
-		url.searchParams.append("dpsi", this.dpsi.toString());
+		url.searchParams.append("dtheta", this.params.dtheta.toString());
+		url.searchParams.append("dpsi", this.params.dpsi.toString());
 		this.copyTextToClipboard(url);
 	}
 

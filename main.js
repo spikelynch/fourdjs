@@ -28,8 +28,8 @@ document.body.appendChild( renderer.domElement );
 
 // set up colours and materials for gui callbacks
 
-scene.background = new THREE.Color(0x000000);
-const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+scene.background = new THREE.Color(0xdddddd);
+const material = new THREE.MeshStandardMaterial({ color: 0x90ebff });
 
 const node_ms = [ material ];
 
@@ -52,7 +52,6 @@ function createShape(name) {
 	}
 	shape = new FourDShape(node_ms, link_ms, STRUCTURES[name]);
 	scene.add(shape);
-
 }
 
 // initialise gui and read params from URL
