@@ -76,7 +76,6 @@ class FourDGUI {
 			}
 		}
 		const guiObj = this;
-		console.log(guiObj);
 		this.link['hyperplane'] = this.numParam('hyperplane', parseFloat, 2);
 		this.link['thickness'] = this.numParam('thickness', parseFloat, 1);
 		this.link['color'] = this.numParam(
