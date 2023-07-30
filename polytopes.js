@@ -179,7 +179,7 @@ function make_600cell_vertices() {
 
 export const cell600 = () => {
 	const nodes  = make_600cell_vertices();
-	const links = auto_detect_edges(nodes, 20);
+	const links = auto_detect_edges(nodes, 12);
 	return {
 		nodes: nodes,
 		links: links,
