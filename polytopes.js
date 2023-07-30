@@ -69,8 +69,8 @@ export const cell5 = () => {
 			{ id:10, source:4, target: 5},
 		],
 		geometry: {
-			node_size: 0.05,
-			link_size: 0.05
+			node_size: 0.02,
+			link_size: 0.02
 		}
 	};
 };
@@ -86,8 +86,8 @@ export const cell16 = () => {
 		nodes: nodes,
 		links: links,
 		geometry: {
-			node_size: 0.03,
-			link_size: 0.03
+			node_size: 0.02,
+			link_size: 0.02
 		}
 	};
 };
@@ -102,8 +102,8 @@ export const tesseract = () => {
 		nodes: nodes,
 		links: links,
 		geometry: {
-			node_size: 0.03,
-			link_size: 0.03
+			node_size: 0.02,
+			link_size: 0.02
 		}
 	};
 }
@@ -156,8 +156,8 @@ export const cell120 = () => {
 		nodes: nodes,
 		links: links,
 		geometry: {
-			node_size: 0.01,
-			link_size: 0.01
+			node_size: 0.02,
+			link_size: 0.02
 		}
 
 	}
@@ -184,8 +184,8 @@ export const cell600 = () => {
 		nodes: nodes,
 		links: links,
 		geometry: {
-			node_size: 0.003,
-			link_size: 0.003
+			node_size: 0.02,
+			link_size: 0.02
 		}
 	}
 }

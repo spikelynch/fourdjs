@@ -32,7 +32,7 @@ class FourDGUI {
 		).onChange(createShape)
 
 		this.gui.add(this.params, 'hyperplane', 1.5, 4);
-		this.gui.add(this.params, 'thickness', 0.01, 4);
+		this.gui.add(this.params, 'thickness', 0.1, 4);
 		this.gui.addColor(this.params, 'color').onChange(setColor);
 		this.gui.addColor(this.params, 'background').onChange(setBackground);
 		this.gui.add(this.params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
