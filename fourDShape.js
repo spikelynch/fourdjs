@@ -121,10 +121,10 @@ class FourDShape extends THREE.Group {
 			const material = this.getMaterial(l, this.link_ms);
 			l.object = this.makeLink(material, l);
 		}
-		// for( const f of this.faces ) {
-		// 	const material = this.getMaterial(f, this.face_ms);
-		// 	f.object = this.makeFace(material, f);
-		// }
+		for( const f of this.faces ) {
+			const material = this.getMaterial(f, this.face_ms);
+			f.object = this.makeFace(material, f);
+		}
 	}
 
 
@@ -141,9 +141,9 @@ class FourDShape extends THREE.Group {
 			this.updateLink(l);
 		}
 
-		// for( const f of this.faces ) {
-		// 	this.setFaceGeometry(f, f.object.geometry);
-		// }
+		for( const f of this.faces ) {
+			this.setFaceGeometry(f, f.object.geometry);
+		}
 	}
 
 

@@ -7,6 +7,8 @@ import { rotfn } from './rotation.js';
 import { FourDGUI } from './gui.js';
 import { FourDShape } from './fourDShape.js';
 
+const FACE_OPACITY = 0.3;
+
 // scene, lights and camera
 
 const scene = new THREE.Scene();
