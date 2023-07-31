@@ -17,7 +17,7 @@ function dist2(n1, n2) {
 	return (n1.x - n2.x) ** 2 + (n1.y - n2.y) ** 2 + (n1.z - n2.z) ** 2 + (n1.w - n2.w) ** 2;
 }
 
-function auto_detect_edges(nodes, neighbours) {
+function auto_detect_edges(nodes, neighbours, debug=false) {
 	const seen = {};
 	const nnodes = nodes.length;
 	const links = [];
@@ -29,6 +29,10 @@ function auto_detect_edges(nodes, neighbours) {
 		}
 		d2.sort((a, b) => a.d2 - b.d2);
 		const closest = d2.slice(1, neighbours + 1);
+		if( debug ) {
+			console.log(`closest = ${closest.length}`);
+			console.log(closest);
+		}
 		for( const e of closest ) {
 			const ids = [ n1.id, e.id ];
 			ids.sort();
@@ -39,6 +43,9 @@ function auto_detect_edges(nodes, neighbours) {
 				id++;
 			}
 		}
+	}
+	if( debug ) {
+		console.log(`Found ${links.length} edges`)
 	}
 	return links;
 }
@@ -179,7 +186,7 @@ function make_600cell_vertices() {
 
 export const cell600 = () => {
 	const nodes  = make_600cell_vertices();
-	const links = auto_detect_edges(nodes, 12);
+	const links = auto_detect_edges(nodes, 12, true);
 	return {
 		nodes: nodes,
 		links: links,
