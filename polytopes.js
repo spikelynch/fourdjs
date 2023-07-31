@@ -17,7 +17,7 @@ function dist2(n1, n2) {
 	return (n1.x - n2.x) ** 2 + (n1.y - n2.y) ** 2 + (n1.z - n2.z) ** 2 + (n1.w - n2.w) ** 2;
 }
 
-function auto_detect_edges(nodes, neighbours) {
+function auto_detect_edges(nodes, neighbours, debug=false) {
 	const seen = {};
 	const nnodes = nodes.length;
 	const links = [];
@@ -29,6 +29,10 @@ function auto_detect_edges(nodes, neighbours) {
 		}
 		d2.sort((a, b) => a.d2 - b.d2);
 		const closest = d2.slice(1, neighbours + 1);
+		if( debug ) {
+			console.log(`closest = ${closest.length}`);
+			console.log(closest);
+		}
 		for( const e of closest ) {
 			const ids = [ n1.id, e.id ];
 			ids.sort();
@@ -39,6 +43,9 @@ function auto_detect_edges(nodes, neighbours) {
 				id++;
 			}
 		}
+	}
+	if( debug ) {
+		console.log(`Found ${links.length} edges`)
 	}
 	return links;
 }
@@ -67,7 +74,11 @@ export const cell5 = () => {
 			{ id:8, source:3, target: 4},
 			{ id:9, source:3, target: 5},
 			{ id:10, source:4, target: 5},
-		]
+		],
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		}
 	};
 };
 
@@ -76,13 +87,15 @@ export const cell16 = () => {
 	let nodes = PERMUTE.coordinates([1, 1, 1, 1],  0);
 	nodes = nodes.filter((n) => n.x * n.y * n.z * n.w > 0);
 	scale_and_index(nodes, 0.75);
-	console.log('cell16 auto_detect_edges');
-	console.log(nodes);
 	const links = auto_detect_edges(nodes, 6);
 
 	return {
 		nodes: nodes,
-		links: links
+		links: links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		}
 	};
 };
 
@@ -94,7 +107,11 @@ export const tesseract = () => {
 
 	return {
 		nodes: nodes,
-		links: links
+		links: links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		}
 	};
 }
 
@@ -107,7 +124,11 @@ export const cell24 = () => {
 
 	return {
 		nodes: nodes,
-		links: links
+		links: links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		}
 	};
 }
 
@@ -218,6 +239,10 @@ export const cell120 = () => {
 	return {
 		nodes: nodes,
 		links: links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		},
 		faces: faces
 	}
 }
@@ -238,10 +263,14 @@ function make_600cell_vertices() {
 
 export const cell600 = () => {
 	const nodes  = make_600cell_vertices();
-	const links = auto_detect_edges(nodes, 20);
+	const links = auto_detect_edges(nodes, 12);
 	return {
 		nodes: nodes,
-		links: links
+		links: links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		}
 	}
 }
 
