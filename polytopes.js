@@ -176,9 +176,9 @@ function make_600cell_vertices() {
 
 	const nodes = [
 		PERMUTE.coordinates([0, 0, 0, 2],  0),
-		PERMUTE.coordinates([1, 1, 1, 1],  0),
+		PERMUTE.coordinates([1, 1, 1, 1],  1),
 
-		PERMUTE.coordinates([phi, 1, 1 / phi, 0], 0, true)
+		PERMUTE.coordinates([phi, 1, 1 / phi, 0], 1, true)
 		].flat();
 	return scale_and_index(nodes, 0.75);
 }
@@ -191,7 +191,7 @@ export const cell600 = () => {
 		nodes: nodes,
 		links: links,
 		geometry: {
-			node_size: 0.02,
+			node_size: 0.08,
 			link_size: 0.02
 		}
 	}
