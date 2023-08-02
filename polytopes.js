@@ -1,16 +1,20 @@
 
 import * as PERMUTE from './permute.js';
 
-function scale_and_index(nodes, scale) {
+function index_nodes(nodes, scale) {
 	let i = 1;
 	for( const n of nodes ) {
 		n["id"] = i;
 		i++;
+	}
+}
+
+function scale_nodes(nodes, scale) {
+	for( const n of nodes ) {
 		for( const a of [ 'x', 'y', 'z', 'w' ] ) {
 			n[a] = scale * n[a];
 		}
 	}
-	return nodes;
 }
 
 function dist2(n1, n2) {
@@ -86,7 +90,8 @@ export const cell5 = () => {
 export const cell16 = () => {
 	let nodes = PERMUTE.coordinates([1, 1, 1, 1],  0);
 	nodes = nodes.filter((n) => n.x * n.y * n.z * n.w > 0);
-	scale_and_index(nodes, 0.75);
+	index_nodes(nodes);
+	scale_nodes(nodes, 0.75);
 	const links = auto_detect_edges(nodes, 6);
 
 	return {
@@ -102,7 +107,9 @@ export const cell16 = () => {
 
 
 export const tesseract = () => {
-	const nodes = scale_and_index(PERMUTE.coordinates([1, 1, 1, 1],  0), Math.sqrt(2) / 2);
+	const nodes = PERMUTE.coordinates([1, 1, 1, 1],  0);
+	index_nodes(nodes);
+	scale_nodes(nodes, Math.sqrt(2) / 2);
 	const links = auto_detect_edges(nodes, 4);
 
 	return {
@@ -119,7 +126,8 @@ export const tesseract = () => {
 
 
 export const cell24 = () => {
-	const nodes = scale_and_index(PERMUTE.coordinates([0, 0, 1, 1],  0), 1);
+	const nodes = PERMUTE.coordinates([0, 0, 1, 1], 0);
+	index_nodes(nodes);
 	const links = auto_detect_edges(nodes, 6);
 
 	return {
@@ -152,7 +160,9 @@ function make_120cell_vertices() {
 		PERMUTE.coordinates([r5, phiinv, phi, 0], 0, true),
 		PERMUTE.coordinates([2, 1, phi, phiinv], 0, true),
 		].flat();
-	return scale_and_index(nodes, 0.5);
+	index_nodes(nodes);
+	scale_nodes(nodes, 0.5);
+	return nodes;
 }
 
 
@@ -171,6 +181,8 @@ export const cell120 = () => {
 }
 
 
+
+
 function make_600cell_vertices() {
 	const phi = 0.5 * (1 + Math.sqrt(5));  
 
@@ -180,8 +192,51 @@ function make_600cell_vertices() {
 
 		PERMUTE.coordinates([phi, 1, 1 / phi, 0], 1, true)
 		].flat();
-	return scale_and_index(nodes, 0.75);
+
+	index_nodes(nodes);
+	const groups = partition_nodes_by_distance(nodes, 2);
+	scale_nodes(nodes, 0.75);
+	return nodes;
 }
+
+// Trying to do this with an algorithm, not just a lookup table.
+// I think that all of the vertices which belong to the same 24-cell group
+// are 2 units apart.
+
+function partition_nodes_by_distance(nodes, d) {
+	const groups = [];
+	const EPSILON = 0.1;
+	for( const n1 of nodes ) {
+		let matched = false;
+		for( const group of groups ) {
+			for( const n2 of group ) {
+				const d2 = dist2(n1, n2);
+				// console.log(`comparing ${n1.id} ${n2.id}`);
+				// console.log(n1);
+				// console.log(n2);
+				// console.log(`${d2} ${Math.abs(d2 - d**2)}`);
+				if( Math.abs(d2 - d ** 2) < EPSILON ) {
+					group.push(n1);
+					matched = true;
+					// console.log(`Matched ${n1.id} ${n2.id} ${d2}`);
+					break;
+				}
+			}
+			if( matched ) {
+				break;
+			}
+		}
+		if(! matched ) {
+			// console.log(`unmatched node ${n1.id}`);
+			groups.push([ n1 ]);
+		}
+	}
+	console.log(`Build ${groups.length} groups`);
+	console.log(groups);
+	return groups;
+}
+
+
 
 
 export const cell600 = () => {
