@@ -203,9 +203,9 @@ function make_600cell_vertices() {
 // I think that all of the vertices which belong to the same 24-cell group
 // are 2 units apart.
 
-function partition_nodes_by_distance(nodes, d) {
+function partition_nodes_by_distance_bad(nodes, d) {
 	const groups = [];
-	const EPSILON = 0.1;
+	const EPSILON = 0.002;
 	for( const n1 of nodes ) {
 		let matched = false;
 		for( const group of groups ) {
@@ -235,6 +235,55 @@ function partition_nodes_by_distance(nodes, d) {
 	console.log(groups);
 	return groups;
 }
+
+// find all nodes in nodesid which are d away from n (and are not n)
+
+function nodes_by_distance(nodesid, n, d) {
+	const EPSILON = 0.02;
+	const neighbours = Object.keys(nodesid).filter((n1id) => {
+		if( n1id !== n.id ) {
+			const d2 = dist2(nodesid[n1id], nodesid[n]);
+			console.log(`${n} ${n1id} ${d2}`);
+			return Math.abs(d2 - d ** 2) < EPSILON;
+		} else {
+			return false;
+		}
+	});
+	console.log(`neighbours at ${d} ${neighbours}`);
+	return neighbours;
+}
+
+
+
+
+
+function partition_nodes_by_distance(nodes, d) {
+	const groups = [];
+	const nodesid = {};
+	const EPSILON = 0.02;
+
+	for( const node of nodes ) {
+		nodesid[node.id] = node;
+	}
+
+	while( Object.keys(nodesid).length > 0 ) {
+		const start = Object.keys(nodesid)[0];
+		const group = [ start ];
+		
+		const neighbours = nodes_by_distance(nodesid, n, d).filter((n2) => !(n2 in group));
+		if( neighbours ) {
+			group.push(...neighbours);
+		}
+
+		const group = partition_r(nodesid, [ start ], start, d);
+		console.log(group);
+		for( const g of group ) {
+			delete nodesid[g];
+		}
+		groups.push(group);
+	}
+}
+
 
 
 
