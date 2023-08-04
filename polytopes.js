@@ -339,8 +339,8 @@ export const cell600 = () => {
 		nodes: nodes,
 		links: links,
 		geometry: {
-			node_size: 0.08,
-			link_size: 0.01
+			node_size: 0.02,
+			link_size: 0.02
 		}
 	}
 }

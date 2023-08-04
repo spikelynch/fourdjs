@@ -132,7 +132,8 @@ function animate() {
 		rotfn[gui.params.yRotate](psi)
 	];
 	shape.hyperplane = gui.params.hyperplane;
-	shape.geom_scale = gui.params.thickness;
+	shape.link_scale = gui.params.thickness;
+	shape.node_scale = gui.params.thickness * (gui.params.nodesize + 1);
 	shape.render3(rotations);
 
 	renderer.render( scene, camera );

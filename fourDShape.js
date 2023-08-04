@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 
-const HYPERPLANE = 2;
+const HYPERPLANE = 2.0;
 
 
 class FourDShape extends THREE.Group {
@@ -15,7 +15,8 @@ class FourDShape extends THREE.Group {
 		this.links = structure.links;
 		this.node_size = structure.geometry.node_size;
 		this.link_size = structure.geometry.link_size;
-		this.geom_scale = 1;
+		this.node_scale = 1;
+		this.link_scale = 1;
 		this.hyperplane = HYPERPLANE;
 		this.initShapes();
 	}
@@ -64,7 +65,7 @@ class FourDShape extends THREE.Group {
 		const length = n1.distanceTo(n2);
 		const centre = new THREE.Vector3();
 		centre.lerpVectors(n1, n2, 0.5);
-		link.object.scale.copy(new THREE.Vector3(this.geom_scale, this.geom_scale, length));
+		link.object.scale.copy(new THREE.Vector3(this.link_scale, this.link_scale, length));
 		link.object.position.copy(centre);
 		link.object.lookAt(n2);
 		link.object.children[0].rotation.x = Math.PI / 2.0;
@@ -97,7 +98,7 @@ class FourDShape extends THREE.Group {
 
 
 	render3(rotations) {
-		this.scalev3 = new THREE.Vector3(this.geom_scale, this.geom_scale, this.geom_scale);
+		this.scalev3 = new THREE.Vector3(this.node_scale, this.node_scale, this.node_scale);
 		for( const n of this.nodes4 ) {
 			const v3 = this.fourDtoV3(n.x, n.y, n.z, n.w, rotations);
 			this.nodes3[n.id].v3 = v3;

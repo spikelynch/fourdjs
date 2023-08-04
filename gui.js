@@ -16,6 +16,7 @@ class FourDGUI {
 		this.params = {
 			shape: this.link['shape'] || DEFAULT_SHAPE,
 			thickness: this.link['thickness'] || 1,
+			nodesize: this.link['nodesize'] || 0,
 			color: this.link['color'] || DEFAULT_COLOR,
 			background: this.link['background'] || DEFAULT_BG,
 			hyperplane: this.link['hyperplane'] || 2,
@@ -31,8 +32,9 @@ class FourDGUI {
 			[ '5-cell', '16-cell', 'tesseract', '24-cell', '120-cell', '600-cell' ]
 		).onChange(createShape)
 
-		this.gui.add(this.params, 'hyperplane', 1.5, 4);
+		this.gui.add(this.params, 'hyperplane', 1.5, 3);
 		this.gui.add(this.params, 'thickness', 0.1, 4);
+		this.gui.add(this.params, 'nodesize', 0, 5);
 		this.gui.addColor(this.params, 'color').onChange(setColor);
 		this.gui.addColor(this.params, 'background').onChange(setBackground);
 		this.gui.add(this.params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
