@@ -16,7 +16,7 @@ class FourDGUI {
 		this.params = {
 			shape: this.link['shape'] || DEFAULT_SHAPE,
 			thickness: this.link['thickness'] || 1,
-			nodesize: this.link['nodesize'] || 0,
+			nodesize: this.link['nodesize'] || 2,
 			color: this.link['color'] || DEFAULT_COLOR,
 			background: this.link['background'] || DEFAULT_BG,
 			hyperplane: this.link['hyperplane'] || 2,

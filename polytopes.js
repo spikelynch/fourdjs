@@ -314,7 +314,7 @@ function make_600cell_vertices() {
 	].flat();
 
 	for( const n of nodes ) {
-		n.label = label_vertex(n, coords, partition600);
+		n.label = label_vertex(n, coords, partition600) - 1;
 	}
 
 	for( const n of nodes ) {
@@ -329,12 +329,32 @@ function make_600cell_vertices() {
 	return nodes;
 }
 
+function get_node(nodes, id) {
+	const ns = nodes.filter((n) => n.id === id);
+	if( ns ) {
+		return ns[0]
+	} else {
+		return undefined;
+	}
+}
+
+function audit_link_labels(nodes, links) {
+	console.log("Link audit");
+	for( const l of links ) {
+		const n1 = get_node(nodes, l.source);
+		const n2 = get_node(nodes, l.target);
+		if( n1.label === n2.label ) {
+			console.log(`link ${l.id} joins ${n1.id} ${n2.id} with label ${n2.label}`);
+		}
+	}
+}
 
 
 
 export const cell600 = () => {
 	const nodes  = make_600cell_vertices();
 	const links = auto_detect_edges(nodes, 12);
+
 	return {
 		nodes: nodes,
 		links: links,
