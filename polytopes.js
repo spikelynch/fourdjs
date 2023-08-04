@@ -61,11 +61,11 @@ export const cell5 = () => {
 	const r2 = Math.sqrt(2) / 2;
 	return {
 		nodes: [
-	      {id:1, x: r2, y: r2, z: r2, w: -r2 / r5 },
-	      {id:2, x: r2, y: -r2, z: -r2, w: -r2 / r5 },
-	      {id:3, x: -r2, y: r2, z: -r2, w: -r2 / r5 },
-	      {id:4, x: -r2, y: -r2, z: r2, w: -r2 / r5 },
-	      {id:5, x: 0, y: 0, z: 0, w: 4 * r2 / r5 },
+	      {id:1, label: 0, x: r2, y: r2, z: r2, w: -r2 / r5 },
+	      {id:2, label: 1, x: r2, y: -r2, z: -r2, w: -r2 / r5 },
+	      {id:3, label: 2, x: -r2, y: r2, z: -r2, w: -r2 / r5 },
+	      {id:4, label: 3, x: -r2, y: -r2, z: r2, w: -r2 / r5 },
+	      {id:5, label: 4, x: 0, y: 0, z: 0, w: 4 * r2 / r5 },
 		],
 		links: [
 			{ id:1, source:1, target: 2},
