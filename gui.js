@@ -13,6 +13,7 @@ class FourDGUI {
 		this.gui = new GUI();
 		this.parseLinkParams();
 		const guiObj = this;
+		console.log(this.link);
 		this.params = {
 			shape: this.link['shape'] || DEFAULT_SHAPE,
 			thickness: this.link['thickness'] || 1,
@@ -80,6 +81,7 @@ class FourDGUI {
 		const guiObj = this;
 		this.link['hyperplane'] = this.numParam('hyperplane', parseFloat, 2);
 		this.link['thickness'] = this.numParam('thickness', parseFloat, 1);
+		this.link['nodesize'] = this.numParam('nodesize', parseFloat, 1);
 		this.link['color'] = this.numParam(
 			'color', (s) => guiObj.stringToHex(s), DEFAULT_COLOR
 			);
@@ -96,6 +98,7 @@ class FourDGUI {
 		const url = new URL(this.linkUrl.origin + this.linkUrl.pathname);
 		url.searchParams.append("shape", this.params.shape);
 		url.searchParams.append("thickness", this.params.thickness.toString());
+		url.searchParams.append("nodesize", this.params.nodesize.toString());
 		url.searchParams.append("color", this.hexToString(this.params.color));
 		url.searchParams.append("background", this.hexToString(this.params.background));
 		url.searchParams.append("hyperplane", this.params.hyperplane.toString());
