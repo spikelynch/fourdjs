@@ -31,8 +31,8 @@ document.body.appendChild( renderer.domElement );
 
 scene.background = new THREE.Color(0x808080);
 const material = new THREE.MeshStandardMaterial({ color: 0x3293a9 });
-const node_colours = get_colours();
-
+const node_colours = get_colours(0x3293a9);
+console.log(node_colours);
 const node_ms = node_colours.map((c) => new THREE.MeshStandardMaterial({color: c}));
 
 const link_ms = [ material ];
@@ -63,7 +63,13 @@ function createShape(name) {
 
 const gui = new FourDGUI(
 	createShape,
-	(c) => { material.color = new THREE.Color(c) },
+	(c) => {
+		const nc = get_colours(c);
+		for( let i = 0; i < node_ms.length; i++ ) {
+			node_ms[i].color = new THREE.Color(nc[i]);
+		}
+		material.color = new THREE.Color(c);
+	},
 	(c) => { scene.background = new THREE.Color(c) },
 );
 

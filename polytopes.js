@@ -223,7 +223,7 @@ const partition600 = {
 	"1,0,-k,t": 3,
 	"k,t,1,0": 3,
 
-	"t,0,-1,k": 4,
+	"t,0,-1,-k": 4,
 	"0,t,k,-1": 4,
 	"1,-k,t,0": 4,
 	"k,1,0,t": 4,
@@ -252,9 +252,35 @@ const partition600 = {
 
 
 
-// permute unique indices -> 
-// use these to label nodes ->
-// assign actual values to indices ->
+function partition_coord(i, coords, invert) {
+	const j = invert ? -i : i;
+	if( j >= 0 ) {
+		return coords[j];
+	}
+	return "-" + coords[-j];
+}
+
+function partition_fingerprint(n, coords, invert) {
+	const p = ['x','y','z','w'].map((a) => partition_coord(n[a], coords, invert));
+	const fp = p.join(',');
+	return fp;
+}
+
+
+function label_vertex(n, coords, partition) {
+	const fp = partition_fingerprint(n, coords, false);
+	if( fp in partition ) {
+		return partition[fp];
+	} else {
+		const ifp = partition_fingerprint(n, coords, true);
+		if( ifp in partition ) {
+			return partition[ifp];
+		}
+		console.log(`Map for ${fp} ${ifp} not found`);
+		return 0;
+	}
+}
+
 
 function map_coord(i, coords, values) {
 	if( i >= 0 ) {
@@ -282,11 +308,14 @@ function make_600cell_vertices() {
 	};
 
 	const nodes = [
-		PERMUTE.coordinates([0, 0, 0, 2],  ),
+		PERMUTE.coordinates([0, 0, 0, 2],  0),
 		PERMUTE.coordinates([1, 1, 1, 1],  0),
-
-		PERMUTE.coordinates([3, 1, 4, 0], 1, true)
+		PERMUTE.coordinates([3, 1, 4, 0],  0, true)
 	].flat();
+
+	for( const n of nodes ) {
+		n.label = label_vertex(n, coords, partition600);
+	}
 
 	for( const n of nodes ) {
 		for( const a of [ 'x', 'y', 'z', 'w'] ) {
@@ -294,8 +323,8 @@ function make_600cell_vertices() {
 		}
 	}
 
+
 	index_nodes(nodes);
-	//const groups = partition_nodes_by_distance(nodes, 2);
 	scale_nodes(nodes, 0.75);
 	return nodes;
 }
@@ -311,7 +340,7 @@ export const cell600 = () => {
 		links: links,
 		geometry: {
 			node_size: 0.08,
-			link_size: 0.02
+			link_size: 0.01
 		}
 	}
 }

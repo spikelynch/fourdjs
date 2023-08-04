@@ -1,8 +1,10 @@
 import ColorScheme from 'color-scheme';
 
-export const get_colours = () => {
-	var scheme = new ColorScheme;
-	scheme.from_hue(21).scheme('triade').variation('soft');
+export const get_colours = (basis) => {
+	const scheme = new ColorScheme;
+	const hexbasis = basis.toString(16).padStart(6, "0");
+	scheme.from_hex(hexbasis).scheme('analogic').variation('hard').distance(0.1);
+	console.log(scheme.colors());
 	return scheme.colors().map((cs) => parseInt('0x' + cs));
 }
 
