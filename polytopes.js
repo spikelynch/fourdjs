@@ -125,17 +125,23 @@ export const tesseract = () => {
 
 
 const CELL24_INDEXING = {
-	x: { y: 'RED', z: 'BLUE', w: 'GREEN' },
-	y: { z: 'GREEN', w: 'BLUE' },
-	z: { w: 'RED' } 
+	x: { y: 0, z: 2, w: 1 },
+	y: { z: 1, w: 2 },
+	z: { w: 0 } 
 };
 
 
 
 export const cell24 = () => {
 	const nodes = PERMUTE.coordinates([0, 0, 1, 1], 0);
+	
+	for( const n of nodes ) {
+		const axes = ['x', 'y', 'z', 'w'].filter((a) => n[a] !== 0);
+		n.label = CELL24_INDEXING[axes[0]][axes[1]];
+	}
+
 	index_nodes(nodes);
-	const links = auto_detect_edges(nodes, 6);
+	const links = auto_detect_edges(nodes, 8);
 
 	return {
 		nodes: nodes,
