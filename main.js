@@ -62,20 +62,24 @@ function createShape(name) {
 // callbacks to do things which are triggered by controls: reset the shape,
 // change the colors.  Otherwise we just read stuff from gui.params.
 
-const gui = new FourDGUI(
-	createShape,
-	(c) => {
-		const nc = get_colours(c);
-		for( let i = 0; i < node_ms.length; i++ ) {
-			node_ms[i].color = new THREE.Color(nc[i]);
-		}
-		material.color = new THREE.Color(c);
-	},
-	(c) => { scene.background = new THREE.Color(c) },
-);
+function setColors(c) {
+	const nc = get_colours(c);
+	for( let i = 0; i < node_ms.length; i++ ) {
+		node_ms[i].color = new THREE.Color(nc[i]);
+	}
+	material.color = new THREE.Color(c);
+}
 
-material.color = new THREE.Color(gui.params.color);
-scene.background = new THREE.Color(gui.params.background);
+function setBackground(c) {
+	scene.background = new THREE.Color(c)
+}
+
+
+const gui = new FourDGUI(createShape, setColors, setBackground);
+
+// these are here to pick up colour settings from the URL params
+setColors(gui.params.color);
+setBackground(gui.params.background);
 
 const dragK = 0.005;
 const damping = 0.99;
