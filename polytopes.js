@@ -124,6 +124,13 @@ export const tesseract = () => {
 
 
 
+const CELL24_INDEXING = {
+	x: { y: 'RED', z: 'BLUE', w: 'GREEN' },
+	y: { z: 'GREEN', w: 'BLUE' },
+	z: { w: 'RED' } 
+};
+
+
 
 export const cell24 = () => {
 	const nodes = PERMUTE.coordinates([0, 0, 1, 1], 0);
