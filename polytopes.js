@@ -180,110 +180,125 @@ export const cell120 = () => {
 	}
 }
 
+// Schoute's partition via https://arxiv.org/abs/1010.4353
 
+const partition600 = {
+
+	"2,0,0,0": 1,
+	"0,2,0,0": 1,
+	"0,0,2,0": 1,
+	"0,0,0,2": 1,
+	"1,1,1,1": 1,
+	"1,1,-1,-1": 1,
+	"1,-1,1,-1": 1,
+	"1,-1,-1,1": 1,
+	"1,-1,-1,-1": 1,
+	"1,-1,1,1": 1,
+	"1,1,-1,1": 1,
+	"1,1,1,-1": 1,
+
+	"k,0,-t,-1": 2,
+	"0,k,1,-t": 2,
+	"t,-1,k,0": 2,
+	"1,t,0,k": 2,
+	"t,k,0,-1": 2,
+	"1,0,k,t": 2,
+	"k,-t,-1,0": 2,
+	"0,1,-t,k": 2,
+	"1,k,t,0": 2,
+	"t,0,-1,k": 2,
+	"0,t,-k,-1": 2,
+	"k,-1,0,-t": 2,
+
+	"t,0,1,k": 3,
+	"0,t,-k,1": 3,
+	"1,-k,-t,0": 3,
+	"k,1,0,-t": 3,
+	"0,k,1,t": 3,
+	"t,1,-k,0": 3,
+	"k,0,t,-1": 3,
+	"1,-t,0,k": 3,
+	"t,-k,0,-1": 3,
+	"0,1,-t,-k": 3,
+	"1,0,-k,t": 3,
+	"k,t,1,0": 3,
+
+	"t,0,-1,k": 4,
+	"0,t,k,-1": 4,
+	"1,-k,t,0": 4,
+	"k,1,0,t": 4,
+	"t,1,k,0": 4,
+	"0,k,-1,-t": 4,
+	"1,-t,0,-k": 4,
+	"k,0,-t,1": 4,
+	"0,1,t,k": 4,
+	"t,-k,0,1": 4,
+	"k,t,-1,0": 4,
+	"1,0,k,-t": 4,
+
+	"k,0,t,1": 5,
+	"0,k,-1,t": 5,
+	"t,-1,-k,0": 5,
+	"1,t,0,-k": 5,
+	"1,0,-k,-t": 5,
+	"t,k,0,1": 5,
+	"0,1,t,-k": 5,
+	"k,-t,1,0": 5,
+	"t,0,1,-k": 5,
+	"1,k,-t,0": 5,
+	"k,-1,0,t": 5,
+	"0,t,k,1": 5
+};
+
+
+
+// permute unique indices -> 
+// use these to label nodes ->
+// assign actual values to indices ->
+
+function map_coord(i, coords, values) {
+	if( i >= 0 ) {
+		return values[coords[i]];
+	}
+	return -values[coords[-i]];
+}
 
 
 function make_600cell_vertices() {
-	const phi = 0.5 * (1 + Math.sqrt(5));  
+	const coords = {
+		0: '0',
+		1: '1',
+		2: '2',
+		3: 't',
+		4: 'k'
+	};
+	const t = 0.5 * (1 + Math.sqrt(5));
+	const values = {
+		'0': 0,
+		'1': 1,
+		'2': 2,
+		't': t,
+		'k': 1 / t 
+	};
 
 	const nodes = [
-		PERMUTE.coordinates([0, 0, 0, 2],  0),
-		PERMUTE.coordinates([1, 1, 1, 1],  1),
+		PERMUTE.coordinates([0, 0, 0, 2],  ),
+		PERMUTE.coordinates([1, 1, 1, 1],  0),
 
-		PERMUTE.coordinates([phi, 1, 1 / phi, 0], 1, true)
-		].flat();
+		PERMUTE.coordinates([3, 1, 4, 0], 1, true)
+	].flat();
+
+	for( const n of nodes ) {
+		for( const a of [ 'x', 'y', 'z', 'w'] ) {
+			n[a] = map_coord(n[a], coords, values);
+		}
+	}
 
 	index_nodes(nodes);
-	const groups = partition_nodes_by_distance(nodes, 2);
+	//const groups = partition_nodes_by_distance(nodes, 2);
 	scale_nodes(nodes, 0.75);
 	return nodes;
 }
-
-// Trying to do this with an algorithm, not just a lookup table.
-// I think that all of the vertices which belong to the same 24-cell group
-// are 2 units apart.
-
-function partition_nodes_by_distance_bad(nodes, d) {
-	const groups = [];
-	const EPSILON = 0.002;
-	for( const n1 of nodes ) {
-		let matched = false;
-		for( const group of groups ) {
-			for( const n2 of group ) {
-				const d2 = dist2(n1, n2);
-				// console.log(`comparing ${n1.id} ${n2.id}`);
-				// console.log(n1);
-				// console.log(n2);
-				// console.log(`${d2} ${Math.abs(d2 - d**2)}`);
-				if( Math.abs(d2 - d ** 2) < EPSILON ) {
-					group.push(n1);
-					matched = true;
-					// console.log(`Matched ${n1.id} ${n2.id} ${d2}`);
-					break;
-				}
-			}
-			if( matched ) {
-				break;
-			}
-		}
-		if(! matched ) {
-			// console.log(`unmatched node ${n1.id}`);
-			groups.push([ n1 ]);
-		}
-	}
-	console.log(`Build ${groups.length} groups`);
-	console.log(groups);
-	return groups;
-}
-
-// find all nodes in nodesid which are d away from n (and are not n)
-
-function nodes_by_distance(nodesid, n, d) {
-	const EPSILON = 0.02;
-	const neighbours = Object.keys(nodesid).filter((n1id) => {
-		if( n1id !== n.id ) {
-			const d2 = dist2(nodesid[n1id], nodesid[n]);
-			console.log(`${n} ${n1id} ${d2}`);
-			return Math.abs(d2 - d ** 2) < EPSILON;
-		} else {
-			return false;
-		}
-	});
-	console.log(`neighbours at ${d} ${neighbours}`);
-	return neighbours;
-}
-
-
-
-
-
-function partition_nodes_by_distance(nodes, d) {
-	const groups = [];
-	const nodesid = {};
-	const EPSILON = 0.02;
-
-	for( const node of nodes ) {
-		nodesid[node.id] = node;
-	}
-
-	while( Object.keys(nodesid).length > 0 ) {
-		const start = Object.keys(nodesid)[0];
-		const group = [ start ];
-		
-		const neighbours = nodes_by_distance(nodesid, n, d).filter((n2) => !(n2 in group));
-		if( neighbours ) {
-			group.push(...neighbours);
-		}
-
-		const group = partition_r(nodesid, [ start ], start, d);
-		console.log(group);
-		for( const g of group ) {
-			delete nodesid[g];
-		}
-		groups.push(group);
-	}
-}
-
 
 
 

@@ -324,22 +324,10 @@ function find_peers(nodesid, seen, n, d) {
 }
 
 
-
-
-
-function partition_from_node(nodesid, start, d) {
-	const group = [];
-	const looping = true;
-	let ns = find_peers(nodesid, group, start, d);
-	console.log(`0 ${ns}`);
-	let i = 1;
-	while( ns.length > 0 && i < ns.length ) {
-		group.push(...ns);
-		ns = find_peers(nodesid, group, ns[i], d);
-		console.log(`${i} ${ns}`);
-		i++;
-	}
-	return group;
+function peer(n1, n2, d) {
+	const d2 = dist2(n1, n2);
+	const EPSILON = 0.01;
+	return Math.abs(d2 - d ** 2) < EPSILON;
 }
 
 
@@ -351,15 +339,27 @@ function partition_nodes_by_distance(nodes, d) {
 	for( const node of nodes ) {
 		nodesid[node.id] = node;
 	}
-
+	let tick = 0;
 	while( Object.keys(nodesid).length > 0 ) {
 		const start = Object.keys(nodesid)[0];
 		console.log(`Start node = ${start}`);
-		const group = partition_from_node(nodesid, start, d);
-		if( group.length < 1 ) {
-			console.log("something went wrong, empty neighbour group");
-			break;
+		const group = [ start ];
+		for( const n2 of Object.keys(nodesid) ) {
+			console.log(`group [ ${group} ] / n2 ${n2}`);
+			const n3 = [];
+			if( !group.includes(n2) ) {
+				console.log(`group: ${group}`);
+				for( const g of group ) {
+					if( peer(nodesid[g], nodesid[n2], d) ) {
+						console.log(`Match`);
+						//n3.push(n2);
+					}
+				}
+			}
+			console.log(`n3 = ${n3}`);
+			group.push(...n3);
 		}
+		process.exit();
 		for( const g of group ) {
 			delete nodesid[g];
 		}
@@ -387,5 +387,6 @@ const cell600 = () => {
 }
 
 
+const nodes = make_600cell_vertices();
 
 
