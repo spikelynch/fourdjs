@@ -4,6 +4,8 @@
 // Based on https://www.qfbox.info/epermute
 
 
+const THREE =require('three');
+
 function pandita(a) {
 	const n = a.length;
 	for( let k = n - 2; k >= 0; k-- ) {
@@ -274,7 +276,7 @@ function make_120cell_vertices() {
 		coordinates([2, 1, phi, phiinv], 0, true),
 		].flat();
 	index_nodes(nodes);
-	scale_nodes(nodes, 0.5);
+//	scale_nodes(nodes, 0.5);
 	return nodes;
 }
 
@@ -311,64 +313,37 @@ function make_600cell_vertices() {
 }
 
 
-function find_peers(nodesid, seen, n, d) {
+function find_by_chord(nodesid, n, d) {
 	const EPSILON = 0.02;
-	console.log(`find_peers ${n} (already seen ${seen})`)
 	return Object.keys(nodesid).filter((n1) => {
-		if( seen.includes(n1) ) {
-			return false;
-		}
 		const d2 = dist2(nodesid[n1], nodesid[n]);
 		return Math.abs(d2 - d ** 2) < EPSILON;
 	});
 }
 
 
-function peer(n1, n2, d) {
+function has_chord(n1, n2, d) {
 	const d2 = dist2(n1, n2);
 	const EPSILON = 0.01;
 	return Math.abs(d2 - d ** 2) < EPSILON;
 }
 
 
-function partition_nodes_by_distance(nodes, d) {
-	const groups = [];
-	const nodesid = {};
-	const EPSILON = 0.005;
-
-	for( const node of nodes ) {
-		nodesid[node.id] = node;
-	}
-	let tick = 0;
-	while( Object.keys(nodesid).length > 0 ) {
-		const start = Object.keys(nodesid)[0];
-		console.log(`Start node = ${start}`);
-		const group = [ start ];
-		for( const n2 of Object.keys(nodesid) ) {
-			console.log(`group [ ${group} ] / n2 ${n2}`);
-			const n3 = [];
-			if( !group.includes(n2) ) {
-				console.log(`group: ${group}`);
-				for( const g of group ) {
-					if( peer(nodesid[g], nodesid[n2], d) ) {
-						console.log(`Match`);
-						//n3.push(n2);
-					}
-				}
-			}
-			console.log(`n3 = ${n3}`);
-			group.push(...n3);
+function find_all_chords(nodes) {
+	const chords = {};
+	for( let i = 0; i < nodes.length - 1; i++ ) {
+		for( let j = i + 1; j < nodes.length; j++ ) {
+			const n1 = nodes[i];
+			const n2 = nodes[j];
+			const chord = Math.sqrt(dist2(n1, n2)).toFixed(5);
+			if( !(chord in chords) ) {
+				chords[chord] = [];
+			} 
+			chords[chord].push([n1, n2]);
 		}
-		process.exit();
-		for( const g of group ) {
-			delete nodesid[g];
-		}
-		groups.push(group);
-		console.log(`Added group ${group}`);
 	}
-	return groups;
+	return chords;
 }
-
 
 
 
@@ -387,6 +362,68 @@ const cell600 = () => {
 }
 
 
-const nodes = make_600cell_vertices();
+function find_chords(chords, n) {
+	return chords.filter((c) => c[0].id === n.id || c[1].id === n.id);
+}
+
+function find_neighbours(chords, n) {
+	const c = find_chords(chords, n);
+	return c.map((c) => c[0].id === n.id ? c[1] : c[0])
+}
+
+
+
+function label_subgraph(chords, label, n) {
+	const neighbours = find_neighbours(chords, n);
+	for( const n1 of neighbours ) {
+		if( n1.label === 0 ) {
+			n1.label = label;
+			console.log(`Added ${n1.id} to group ${label}`);
+			label_subgraph(chords, label, n1);
+		} else {
+			if( n1.label !== label ) {
+			console.log(`node ${n1.id} is already in group ${n1.label}`);
+			}
+		}
+	}
+}
+
+function vector_angle(n1, n2, n3) {
+	const v1 = new THREE.Vector4(n1.x, n1.y, n1.z, n1.w);
+	const v2 = new THREE.Vector4(n2.x, n2.y, n2.z, n2.w);
+	const v3 = new THREE.Vector4(n3.x, n3.y, n3.z, n3.w);
+	v2.sub(v1);
+	v3.sub(v1);
+	const dp = v2.dot(v3);
+	return Math.acos(dp / ( v2.length() * v3.length()));
+}
+
+function neighbour_angles(chords, n) {
+	const ns = find_neighbours(chords, n);
+	const angles = {};
+	for( let i = 0; i < ns.length - 1; i++ ) {
+		for( let j = i + 1; j < ns.length; j++ ) {
+			const n2 = ns[i];
+			const n3 = ns[j];
+			const a = THREE.MathUtils.radToDeg(vector_angle(n, n2, n3));
+			const af = (a).toFixed(3);
+			console.log(`${n2.id} ${n3.id} ${af}`)
+			if( ! (af in angles) ) {
+				angles[af] = [];
+			}
+			angles[af].push([n2.id, n3.id]);
+		}
+	}
+	return angles;
+}
+
+
+const nodes = make_120cell_vertices();
+
+const chords = find_all_chords(nodes)
+
+const chord3 = chords["1.74806"];
+
+
 
 
