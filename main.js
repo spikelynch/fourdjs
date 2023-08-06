@@ -33,6 +33,8 @@ scene.background = new THREE.Color(0x808080);
 const material = new THREE.MeshStandardMaterial({ color: 0x3293a9 });
 const node_colours = get_colours(0x3293a9);
 
+material.transparent = true;
+material.opacity = 0.5;
 
 const node_ms = node_colours.map((c) => new THREE.MeshStandardMaterial({color: c}));
 

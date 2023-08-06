@@ -505,37 +505,41 @@ function make_120_partition(nodes, n) {
 	const pairs60 = neighbour_angles(chord3, n, "60.000");
 	const icosas = partition_nodes(pairs60);
 
+	n.label = 1;
 	const angles = icosa_nodes(nodes, icosas[0]);
 	label_120_partition_r(nodes, chord3, 1, n, angles);
 }
 
 // recursive function to label a single 600-cell vertex partition of the 
 // 120-cell by following icosahedral nets
+// this doesn't work! completely - labels only 108-112
 
 function label_120_partition_r(nodes, chords, label, origin, neighbours) {
-	console.log(`label_120_partition_r`);
-	console.log(origin);
-	console.log(neighbours.map((n) => n.id));
+	console.log(`label_120_partition_r ${origin.id}`);
+	console.log(neighbours.map((n) => n.id).join(', '));
+
+	// first try to label everything
+	const unlabelled = [];
 	for( const n of neighbours ) {
-
 		if( n.label === 0 ) {
+			console.log(`Labelled ${n.id} ${label}`);
 			n.label = label;
-			console.log(`Added ${n.id} to group ${label}`);
-
-			// the angles represent two icosahedral pyramids - partition them and
-			// pick the one which is at 60 to the edge we arrived on
-			console.log(`looking for more neighbors for ${n}`);
-			const pairs60 = neighbour_angles(chords, n, "60.000");
-			const icosas = partition_nodes(pairs60);
-			const icosa = choose_icosa(nodes, origin, n, icosas);
-			const icosa_n = icosa_nodes(nodes, icosa);
-			return label_120_partition_r(nodes, chords, label, n, icosa_n);
-		} else {
-			if( n.label !== label ) {
-				console.log(`node ${n.id} is already in group ${n.label}`);
-				return false;
-			}
+			unlabelled.push(n);
+		} else if( n.label !== label ) {
+			console.log(`node ${n.id} is already in group ${n.label}`);
+			//return false;
 		}
+	}
+	for( const n of unlabelled ) { 
+		// the angles represent two icosahedral pyramids - partition them and
+		// pick the one which is at 60 to the edge we arrived on
+		//console.log(`looking for more neighbors for ${n}`);
+		const pairs60 = neighbour_angles(chords, n, "60.000");
+		const icosas = partition_nodes(pairs60);
+		const icosa = choose_icosa(nodes, origin, n, icosas);
+		const icosa_n = icosa_nodes(nodes, icosa);
+		console.log(`recursing to ${nice_icosa(nodes,icosa)}`);
+		return label_120_partition_r(nodes, chords, label, n, icosa_n);
 	}
 }
 
@@ -558,7 +562,7 @@ function choose_icosa(nodes, origin, n1, icosas) {
 }
 
 function icosa_nodes(nodes, icosa) {
-	return Array.from(icosa).map((nid) => node_by_id(nodes, nid));
+	return Array.from(icosa).map((nid) => node_by_id(nodes, nid)).sort((a, b) => a.id - b.id);
 }
 
 function node_by_id(nodes, nid) {
@@ -567,13 +571,64 @@ function node_by_id(nodes, nid) {
 }
 
 
+function enumerate_icosas(nodes) {
+	const chords = find_all_chords(nodes);
+	const chord3 = chords["1.74806"];  // these are edges of the 600-cells;
+
+	for( const n of nodes ) {
+		const pairs60 = neighbour_angles(chord3, n, "60.000");
+		const icosas = partition_nodes(pairs60);
+		for( const icosa of icosas ) {
+			const inodes = icosa_nodes(nodes, icosa);
+			console.log(icosa_to_csv(n.id, inodes).join(','));
+		}
+	}
+}
+
+
+function icosa_to_csv(nid, icosa) {
+	const cols = [ nid ];
+	const ia = icosa.map((n) => n.id);
+	for( let i = 1; i < 601; i++ ) {
+		if( ia.includes(i) ) {
+			cols.push(i);
+		} else {
+			cols.push('')
+		}
+	}
+	return cols;
+}
+
+
+function start_icosas(nodes, chords, origin) {
+	const pairs60 = neighbour_angles(chords, origin, "60.000");
+	return partition_nodes(pairs60).map((i) => nice_icosa(nodes, i));
+}
+
+
+
+function next_icosa(nodes, chords, origin, nid) {
+	const n = node_by_id(nodes, nid);
+	const pairs60 = neighbour_angles(chords, n, "60.000");
+	const icosas = partition_nodes(pairs60);
+	const icosa = choose_icosa(nodes, origin, n, icosas);
+
+	return nice_icosa(nodes, icosa);
+}
+
+function nice_icosa(nodes, icosa) {
+	return icosa_nodes(nodes, icosa).map((n) => n.id).join(', ');
+}
+
 
 const nodes = make_120cell_vertices();
-
 // const chords = find_all_chords(nodes);
 // const chord3 = chords["1.74806"];  // these are edges of the 600-cells;
-// const pairs60 = neighbour_angles(chord3, nodes[0], "60.000");
-// const icosas = partition_nodes(pairs60);
+
+//const pairs60 = neighbour_angles(chord3, nodes[0], "60.000");
+//const icosas = partition_nodes(pairs60);
+
+make_120_partition(nodes, nodes[0])
 
 
 

@@ -119,6 +119,13 @@ export const cell16 = () => {
 export const tesseract = () => {
 	const nodes = PERMUTE.coordinates([1, 1, 1, 1],  0);
 	index_nodes(nodes);
+
+	for( const n of nodes ) {
+		if( n.x * n.y * n.z * n.w > 0 ) {
+			n.label = 1;
+		}
+	}
+
 	scale_nodes(nodes, Math.sqrt(2) / 2);
 	const links = auto_detect_edges(nodes, 4);
 
@@ -168,6 +175,7 @@ export const cell24 = () => {
 // see table in https://en.wikipedia.org/wiki/120-cell - maybe adapt the
 // unit radius table
 
+
 function make_120cell_vertices() {
 	const phi = 0.5 * (1 + Math.sqrt(5));  
 	const r5 = Math.sqrt(5);   
@@ -177,22 +185,20 @@ function make_120cell_vertices() {
 
 	const nodes = [
 		PERMUTE.coordinates([0, 0, 2, 2],  0),
-		PERMUTE.coordinates([1, 1, 1, r5], 0),
-		PERMUTE.coordinates([phi, phi, phi, phi2inv], 0),
-		PERMUTE.coordinates([phiinv, phiinv, phiinv, phi2], 0),
+		PERMUTE.coordinates([1, 1, 1, r5], 1),
+		PERMUTE.coordinates([phi, phi, phi, phi2inv], 2),
+		PERMUTE.coordinates([phiinv, phiinv, phiinv, phi2], 3),
 
-		PERMUTE.coordinates([phi2, phi2inv, 1, 0], 0, true),
-		PERMUTE.coordinates([r5, phiinv, phi, 0], 0, true),
-		PERMUTE.coordinates([2, 1, phi, phiinv], 0, true),
+		PERMUTE.coordinates([phi2, phi2inv, 1, 0], 4, true),
+		PERMUTE.coordinates([r5, phiinv, phi, 0], 5, true),
+		PERMUTE.coordinates([2, 1, phi, phiinv], 6, true),
 		].flat();
 	index_nodes(nodes);
-	label_nodes(nodes, [1], 1);
-	label_nodes(nodes, [25, 41, 97, 109, 157, 161, 173, 177, 113, 37, 53, 93 ], 2);
-
-	label_nodes(nodes, [29, 45, 101, 105, 153, 165, 169, 181, 117, 33, 49, 89], 4);
 	scale_nodes(nodes, 0.5);
 	return nodes;
 }
+
+
 
 function label_nodes(nodes, ids, label) {
 	nodes.filter((n) => ids.includes(n.id)).map((n) => n.label = label);
