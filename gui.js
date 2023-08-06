@@ -1,7 +1,7 @@
 import { GUI } from 'lil-gui';
 
 
-const DEFAULT_SHAPE = '24-cell';
+const DEFAULT_SHAPE = '120-cell';
 const DEFAULT_COLOR = 0x3293a9;
 const DEFAULT_BG = 0x808080;
 
@@ -30,7 +30,7 @@ class FourDGUI {
 		};
 
 		this.gui.add(this.params, 'shape',
-			[ '5-cell', '16-cell', 'tesseract', '24-cell', '120-cell', '600-cell' ]
+			[ '5-cell', '16-cell', 'tesseract', '24-cell', '600-cell', '120-cell' ]
 		).onChange(createShape)
 
 		this.gui.add(this.params, 'hyperplane', 1.5, 3);
