@@ -388,6 +388,87 @@ function label_subgraph(chords, label, n) {
 	}
 }
 
+// for a list of pairs [n1, n2] (these are nodes which share a common angle
+// from a center), find all the groups of nodes which don't appear in a pair
+// together
+
+function partition_nodes(pairs) {
+	let groups = [];
+	const seen = new Set();
+	for( const pair of pairs ) {
+		// both nodes are in a group already
+		if( seen.has(pair[0]) && seen.has(pair[1]) ) {
+			continue;
+		}
+		let already = false;
+		// check if either node is already in a group
+		for( const group of groups ) {
+			if( group.has(pair[0]) ) {
+				group.add(pair[1]);
+				seen.add(pair[1]);
+				already = true;
+				continue;
+			} else if( group.has(pair[1]) ) {
+				group.has(pair[0]);
+				seen.has(pair[0]);
+				already = true;
+				continue;
+			}
+		}
+		// if neither of the pair was in a former group, start a new group
+		if( !already ) {
+			groups.push(new Set(pair));
+			console.log(`new group ${groups}`)
+		}
+		// collapse any groups which now have common elements
+		groups = collapse_groups(groups);
+	}
+	return groups;
+}
+
+// given a list of groups, if any have common elements, collapse them
+
+function collapse_groups(groups) {
+	const new_groups = [ ];
+	for( group of groups ) {
+		let collapsed = false;
+		for( new_group of new_groups ) {
+			const i = intersection(group, new_group);
+			if( i.size > 0 ) {
+				for( const e of group ) {
+					new_group.add(e);
+				}
+				collapsed = true;
+				break;
+			}
+		}
+		if( !collapsed ) {
+			new_groups.push(new Set(group));
+		}
+	}
+	return new_groups;
+}
+
+
+function intersection(s1, s2) {
+	const i = new Set();
+	for( const e of s1 ) {
+		if( s2.has(e) ) {
+			i.add(e)
+		}
+	}
+	return i;
+}
+
+function union(s1, s2) {
+	const u = new Set(s1);
+	for( const e of s2 ) {
+		u.add(e);
+	}
+	return u;
+}
+
+
 function vector_angle(n1, n2, n3) {
 	const v1 = new THREE.Vector4(n1.x, n1.y, n1.z, n1.w);
 	const v2 = new THREE.Vector4(n2.x, n2.y, n2.z, n2.w);
@@ -407,7 +488,6 @@ function neighbour_angles(chords, n) {
 			const n3 = ns[j];
 			const a = THREE.MathUtils.radToDeg(vector_angle(n, n2, n3));
 			const af = (a).toFixed(3);
-			console.log(`${n2.id} ${n3.id} ${af}`)
 			if( ! (af in angles) ) {
 				angles[af] = [];
 			}
@@ -424,6 +504,8 @@ const chords = find_all_chords(nodes)
 
 const chord3 = chords["1.74806"];
 
+const angle_groups = neighbour_angles(chord3, nodes[0]);
 
+const pairs60 = angle_groups['60.000'];
 
 
