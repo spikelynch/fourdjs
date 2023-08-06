@@ -78,22 +78,23 @@ for eg - this works for the chords from 1!
 	[ 113, 177 ],
     [ 157, 161 ],  
 
-    [ 29, 45 ], 
-    [ 29, 101 ],
-    [ 29, 105 ],
-    [ 29, 153 ],
-    [ 29, 165 ],
-    [ 45, 101 ],
+
+    [ 29, 45 ],     5
+    [ 29, 101 ],    101
+    [ 29, 105 ],    105
+    [ 29, 153 ],    153
+    [ 29, 165 ],    165
+    [ 45, 101 ],    
     [ 45, 105 ],
-    [ 45, 169 ],
-    [ 45, 181 ],
-	[ 101, 117 ],
-	[ 101, 165 ],
+    [ 45, 169 ],    169
+    [ 45, 181 ],    181
+	[ 101, 117 ],   117
+	[ 101, 165 ],   
 	[ 101, 181 ],
-    [ 105, 153 ],
+    [ 105, 153 ],  
     [ 105, 169 ],
-    [ 33, 49 ],
-    [ 33, 89 ],
+    [ 33, 49 ],     33 49
+    [ 33, 89 ],     89
     [ 33, 117 ],
     [ 33, 153 ],
     [ 33, 165 ],
@@ -122,7 +123,11 @@ Plan for Sunday:
 * use the existing label_subgraph to make a function which partitions the
   60-angle chords into two groups (like I did manually above)
 
+  // this is done and seems to work
+
 * test this labelling manually (ie colour one set of 60-angle vertices)
+
+  // done this with the manual labels and it looks good
 
 * make another labeling routine which can fill out the rest of the 600-cell
   from the starting dodecahedron, by only following chords which are at 60
@@ -137,3 +142,43 @@ Then the big algorithm does the following:
 - find 60-angles, partition them, pick a partition with no unlabelled cells and label that 600-cell
 
 - repeat the previous step for the remaining three 600-cells
+
+Alternative, more manual option: just write the second labelling routine and
+do the rest by hand
+
+
+    [ 25, 41 ],
+    [ 25, 97 ],
+    [ 25, 109 ],
+    [ 25, 157 ],
+    [ 25, 161 ],  
+    [ 41, 97 ],
+    [ 41, 109 ],
+    [ 41, 173 ],
+    [ 41, 177 ],
+ 	[ 97, 113 ],
+ 	[ 97, 161 ],
+    [ 97, 177 ],
+    [ 37, 53 ],
+    [ 37, 93 ],
+    [ 37, 113 ],
+    [ 37, 157 ],
+    [ 37, 161 ],
+    [ 53, 93 ],
+    [ 53, 113 ],
+    [ 53, 173 ],
+    [ 53, 177 ],
+	[ 173, 177 ]
+    [ 93, 109 ],
+	[ 93, 157 ],
+	[ 93, 173 ],   
+ 	[ 109, 157 ],
+ 	[ 109, 173 ],
+	[ 113, 161 ],
+	[ 113, 177 ],
+    [ 157, 161 ],  
+25 41 97 109
+157 161 173 177
+113 37 53 93
+
+
