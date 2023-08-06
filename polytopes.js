@@ -164,7 +164,9 @@ export const cell24 = () => {
 }
 
 
-
+// notes on coherent indexing
+// see table in https://en.wikipedia.org/wiki/120-cell - maybe adapt the
+// unit radius table
 
 function make_120cell_vertices() {
 	const phi = 0.5 * (1 + Math.sqrt(5));  
@@ -184,9 +186,18 @@ function make_120cell_vertices() {
 		PERMUTE.coordinates([2, 1, phi, phiinv], 0, true),
 		].flat();
 	index_nodes(nodes);
+	label_nodes(nodes, [1], 1);
+	label_nodes(nodes, [25, 41, 97, 109, 157, 161, 173, 177, 113, 37, 53, 93 ], 2);
+
+	label_nodes(nodes, [29, 45, 101, 105, 153, 165, 169, 181, 117, 33, 49, 89], 4);
 	scale_nodes(nodes, 0.5);
 	return nodes;
 }
+
+function label_nodes(nodes, ids, label) {
+	nodes.filter((n) => ids.includes(n.id)).map((n) => n.label = label);
+}
+
 
 
 export const cell120 = () => {
