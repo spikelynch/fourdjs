@@ -373,21 +373,6 @@ function find_neighbours(chords, n) {
 
 
 
-function label_subgraph(chords, label, n) {
-	const neighbours = find_neighbours(chords, n);
-	for( const n1 of neighbours ) {
-		if( n1.label === 0 ) {
-			n1.label = label;
-			console.log(`Added ${n1.id} to group ${label}`);
-			label_subgraph(chords, label, n1);
-		} else {
-			if( n1.label !== label ) {
-			console.log(`node ${n1.id} is already in group ${n1.label}`);
-			}
-		}
-	}
-}
-
 // for a list of pairs [n1, n2] (these are nodes which share a common angle
 // from a center), find all the groups of nodes which don't appear in a pair
 // together
@@ -418,7 +403,6 @@ function partition_nodes(pairs) {
 		// if neither of the pair was in a former group, start a new group
 		if( !already ) {
 			groups.push(new Set(pair));
-			console.log(`new group ${groups}`)
 		}
 		// collapse any groups which now have common elements
 		groups = collapse_groups(groups);
@@ -479,7 +463,7 @@ function vector_angle(n1, n2, n3) {
 	return Math.acos(dp / ( v2.length() * v3.length()));
 }
 
-function neighbour_angles(chords, n) {
+function neighbour_angles_orig(chords, n) {
 	const ns = find_neighbours(chords, n);
 	const angles = {};
 	for( let i = 0; i < ns.length - 1; i++ ) {
@@ -497,15 +481,99 @@ function neighbour_angles(chords, n) {
 	return angles;
 }
 
+function neighbour_angles(chords, n, angle) {
+	const ns = find_neighbours(chords, n);
+	const pairs = [];
+	for( let i = 0; i < ns.length - 1; i++ ) {
+		for( let j = i + 1; j < ns.length; j++ ) {
+			const n2 = ns[i];
+			const n3 = ns[j];
+			const a = THREE.MathUtils.radToDeg(vector_angle(n, n2, n3));
+			const af = (a).toFixed(3);
+			if( af === angle ) {
+				pairs.push([n2.id, n3.id]);
+			}
+		}
+	}
+	return pairs;
+}
+
+
+function make_120_partition(nodes, n) {
+	const chords = find_all_chords(nodes);
+	const chord3 = chords["1.74806"];  // these are edges of the 600-cells;
+	const pairs60 = neighbour_angles(chord3, n, "60.000");
+	const icosas = partition_nodes(pairs60);
+
+	const angles = icosa_nodes(nodes, icosas[0]);
+	label_120_partition_r(nodes, chord3, 1, n, angles);
+}
+
+// recursive function to label a single 600-cell vertex partition of the 
+// 120-cell by following icosahedral nets
+
+function label_120_partition_r(nodes, chords, label, origin, neighbours) {
+	console.log(`label_120_partition_r`);
+	console.log(origin);
+	console.log(neighbours.map((n) => n.id));
+	for( const n of neighbours ) {
+
+		if( n.label === 0 ) {
+			n.label = label;
+			console.log(`Added ${n.id} to group ${label}`);
+
+			// the angles represent two icosahedral pyramids - partition them and
+			// pick the one which is at 60 to the edge we arrived on
+			console.log(`looking for more neighbors for ${n}`);
+			const pairs60 = neighbour_angles(chords, n, "60.000");
+			const icosas = partition_nodes(pairs60);
+			const icosa = choose_icosa(nodes, origin, n, icosas);
+			const icosa_n = icosa_nodes(nodes, icosa);
+			return label_120_partition_r(nodes, chords, label, n, icosa_n);
+		} else {
+			if( n.label !== label ) {
+				console.log(`node ${n.id} is already in group ${n.label}`);
+				return false;
+			}
+		}
+	}
+}
+
+// given a pair of icosa-sets, pick the one which is at the right angle to
+// the incoming vector
+
+function choose_icosa(nodes, origin, n1, icosas) {
+	for( const icosa of icosas ) {
+		const inodes = icosa_nodes(nodes, icosa);
+		const a60 = inodes.map((ni) => {
+			const a = THREE.MathUtils.radToDeg(vector_angle(n1, origin, ni));
+			return a.toFixed(3);
+		});
+		if( a60.filter((a) => a === "60.000").length > 0 ) {
+			return icosa;
+		}
+	}
+	console.log("No icosa found!");
+	return undefined;
+}
+
+function icosa_nodes(nodes, icosa) {
+	return Array.from(icosa).map((nid) => node_by_id(nodes, nid));
+}
+
+function node_by_id(nodes, nid) {
+	const ns = nodes.filter((n) => n.id === nid);
+	return ns[0];
+}
+
+
 
 const nodes = make_120cell_vertices();
 
-const chords = find_all_chords(nodes)
+// const chords = find_all_chords(nodes);
+// const chord3 = chords["1.74806"];  // these are edges of the 600-cells;
+// const pairs60 = neighbour_angles(chord3, nodes[0], "60.000");
+// const icosas = partition_nodes(pairs60);
 
-const chord3 = chords["1.74806"];
-
-const angle_groups = neighbour_angles(chord3, nodes[0]);
-
-const pairs60 = angle_groups['60.000'];
 
 
