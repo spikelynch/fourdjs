@@ -182,3 +182,7 @@ do the rest by hand
 113 37 53 93
 
 
+Another idea - look at colouring the vertices of a dodecahedron according to
+the four compound tetrahedra and see if this can be repeated automatically to
+neighbouring cells
+
