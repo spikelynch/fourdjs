@@ -262,6 +262,7 @@ function dumb_label_120cell(nodes, links) {
 
 
 // stupid tetrahedral labelling
+// keeps getting stuck
 
 
 function naive_label_120cell(nodes, links, n) {
@@ -283,9 +284,11 @@ function naive_label_120cell(nodes, links, n) {
 		const pcols = [ 1, 2, 3, 4, 5 ].filter((c) => !cols.has(c));
 		if( pcols.length < 1 ) {
 			console.log(`Got stuck, no options at ${n.id}`);
+			return false;
 		} else {
 			n.label = pcols[0];
 			console.log(`applied ${pcols[0]} to node ${n.id}`);
+			return true;
 		}
 	});
 }
