@@ -8,6 +8,8 @@ import { FourDGUI } from './gui.js';
 import { FourDShape } from './fourDShape.js';
 import { get_colours } from './colours.js';
 
+const FACE_OPACITY = 0.3;
+
 // scene, lights and camera
 
 const scene = new THREE.Scene();
@@ -40,6 +42,17 @@ const node_ms = node_colours.map((c) => new THREE.MeshStandardMaterial({color: c
 
 const link_ms = [ material ];
 
+
+const face_ms = [
+	new THREE.MeshLambertMaterial( { color: 0x44ff44 } )
+	];
+
+for( const face_m of face_ms ) {
+	face_m.transparent = true;	
+	face_m.opacity = FACE_OPACITY;
+}
+
+
 const STRUCTURES = {
 	'5-cell': POLYTOPES.cell5(),
 	'16-cell': POLYTOPES.cell16(),
@@ -55,7 +68,8 @@ function createShape(name) {
 	if( shape ) {
 		scene.remove(shape);
 	}
-	shape = new FourDShape(node_ms, link_ms, STRUCTURES[name]);
+	console.log(STRUCTURES[name]);
+	shape = new FourDShape(node_ms, link_ms, face_ms, STRUCTURES[name]);
 	scene.add(shape);
 }
 

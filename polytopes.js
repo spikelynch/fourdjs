@@ -170,9 +170,82 @@ export const cell24 = () => {
 }
 
 
-// notes on coherent indexing
-// see table in https://en.wikipedia.org/wiki/120-cell - maybe adapt the
-// unit radius table
+// face detection for the 120-cell
+
+// NOTE: all of these return node ids, not nodes
+
+// return all the links which connect to a node
+
+function nodes_links(links, nodeid) {
+	return links.filter((l) => l.source === nodeid || l.target === nodeid);
+}
+
+// filter to remove a link to a given id from a set of links
+
+function not_to_this(link, nodeid) {
+	return !(link.source === nodeid || link.target === nodeid);
+}
+
+// given nodes n1, n2, return all neighbours of n2 which are not n1
+
+function unmutuals(links, n1id, n2id) {
+	const nlinks = nodes_links(links, n2id).filter((l) => not_to_this(l, n1id));
+	return nlinks.map((l) => {
+		if( l.source === n2id ) {
+			return l.target;
+		} else {
+			return l.source;
+		}
+	})
+}
+
+
+function fingerprint(ids) {
+	const sids = [...ids];
+	sids.sort();
+	return sids.join(',');
+}
+
+
+
+function auto_120cell_faces(links) {
+	const faces = [];
+	const seen = {};
+	let id = 1;
+	for( const edge of links ) {
+		const v1 = edge.source;
+		const v2 = edge.target;
+		const n1 = unmutuals(links, v2, v1);
+		const n2 = unmutuals(links, v1, v2);
+		const shared = [];
+		for( const a of n1 ) {
+			const an = unmutuals(links, v1, a);
+			for( const d of n2 ) {
+				const dn = unmutuals(links, v2, d);
+				for( const x of an ) {
+					for( const y of dn ) {
+						if( x == y ) {
+							shared.push([v1, a, x, d, v2])
+						}
+					}
+				}
+			}
+		}
+		if( shared.length !== 3 ) {
+			console.log(`Bad shared faces for ${edge.id} ${v1} ${v2}`);
+		}
+		for( const face of shared ) {
+			const fp = fingerprint(face);
+			if( !seen[fp] ) {
+				faces.push({ id: id, nodes: face });
+				id++;
+				seen[fp] = true;
+			}
+		}
+	}
+	return faces;
+}
+
 
 
 function make_120cell_vertices() {
@@ -310,8 +383,8 @@ export const cell120 = () => {
 		geometry: {
 			node_size: 0.02,
 			link_size: 0.02
-		}
-
+		},
+		faces: faces
 	}
 }
 
