@@ -621,14 +621,48 @@ function nice_icosa(nodes, icosa) {
 }
 
 
+// New approach with tetrahedral coloring
+
+function find_edges(links, nid) {
+	return links.filter((l) => l.source === nid || l.target === nid );
+}
+
+
+function find_adjacent(links, nid) {
+	return find_edges(links, nid).map((l) => {
+		if( l.source === nid ) {
+			return l.target;
+		} else {
+			return l.source;
+		}
+	});
+}
+
+function iterate_graph(nodes, links, n, fn) {
+	const queue = [];
+	const seen = {};
+	const nodes_id = {};
+	nodes.map((n) => nodes_id[n.id] = n);
+
+	queue.push(n.id);
+	seen[n.id] = true;
+	fn(n);
+
+	while( queue.length > 0 ) {
+		const v = queue.shift();
+		find_adjacent(links, v).map((aid) => {
+			if( !(aid in seen) ) {
+				seen[aid] = true;
+				queue.push(aid);
+				fn(nodes_id[aid]);
+			}
+		})
+	}
+}
+
+
 const nodes = make_120cell_vertices();
-// const chords = find_all_chords(nodes);
-// const chord3 = chords["1.74806"];  // these are edges of the 600-cells;
 
-//const pairs60 = neighbour_angles(chord3, nodes[0], "60.000");
-//const icosas = partition_nodes(pairs60);
-
-make_120_partition(nodes, nodes[0])
-
+const links = auto_detect_edges(nodes, 4);
 
 
