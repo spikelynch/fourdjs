@@ -360,6 +360,7 @@ function naive_label_120cell(nodes, links, n) {
 			return false;
 		} else {
 			n.label = pcols[0];
+			console.log(`found ${pcols.length} colors for node ${n.id}`);
 			console.log(`applied ${pcols[0]} to node ${n.id}`);
 			return true;
 		}
@@ -384,7 +385,6 @@ export const cell120 = () => {
 			node_size: 0.02,
 			link_size: 0.02
 		},
-		faces: faces
 	}
 }
 
