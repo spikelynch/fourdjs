@@ -349,7 +349,7 @@ function auto_120cell_faces(links) {
 		for( const face of shared ) {
 			const fp = fingerprint(face);
 			if( !seen[fp] ) {
-				faces.push({ id: id, nodes: face });
+				faces.push({ id: id, edge: edge.id, v1: edge.source, v2: edge.target, fingerprint: fp, nodes: face });
 				id++;
 				seen[fp] = true;
 			}
@@ -357,6 +357,9 @@ function auto_120cell_faces(links) {
 	}
 	return faces;
 }
+
+
+
 
 
 
@@ -786,5 +789,17 @@ function naive_label_120cell(nodes, links, n) {
 
 const nodes = make_120cell_vertices();
 const links = auto_detect_edges(nodes, 4);
+const faces = auto_120cell_faces(links);
 
+console.log('links');
+
+for( const link of links ) {
+	console.log(link);
+}
+
+console.log('faces');
+
+for( const face of faces ) {
+	console.log(face);
+}
 

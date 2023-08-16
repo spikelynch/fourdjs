@@ -368,6 +368,28 @@ function naive_label_120cell(nodes, links, n) {
 }
 
 
+function manual_label_120cell(nodes, links) {
+
+	const faces = auto_120cell_faces(links);
+	const cfaces = [ 1, 2, 4, 145, 169 ];
+
+	const ns = new Set();
+
+	for( const fid of cfaces ) {
+		const face = faces.filter((f)=> f.id === fid );
+		console.log(face);
+		if( face.length > 0 ) {
+			for ( const nid of face[0].nodes ) {
+				ns.add(nid);
+			}
+		}
+	}
+
+
+	label_nodes(nodes, Array.from(ns), 4);
+
+}
+
 
 
 
@@ -376,7 +398,7 @@ export const cell120 = () => {
 	const nodes  = make_120cell_vertices();
 	const links = auto_detect_edges(nodes, 4);
 
-	naive_label_120cell(nodes, links);
+	manual_label_120cell(nodes, links);
 
 	return {
 		nodes: nodes,
