@@ -312,7 +312,52 @@ function find_dodeca_mutuals(faces, f1, f2) {
 	return mutuals;
 }
 
+function find_dodeca_next(faces, dodeca, f1, f2) {
+	// of a pair of mutuals, return the one we haven't already got
+	const m = find_dodeca_mutuals(faces, f1, f2);
+	if( dodeca.filter((f) => f.id === m[0].id ).length > 0 ) {
+		m.shift();
+	}
+	return m[0];
+}
 
+// from any two mutual faces, return all the faces in their dodecahedron
+
+function make_dodecahedron(faces, f1, f2) {
+	const dodecahedron = [ f1, f2 ];
+	console.log(`First two: ${f1.id} ${f2.id}`);
+
+	// take f1 as the 'center', get the other four around it from f2
+	const fs = find_dodeca_mutuals(faces, f1, f2);
+	const f3 = fs[0];
+	const f6 = fs[1];
+	dodecahedron.push(f3);
+	const f4 = find_dodeca_next(faces, dodecahedron, f1, f3);
+	dodecahedron.push(f4);
+	const f5 = find_dodeca_next(faces, dodecahedron, f1, f4);
+	dodecahedron.push(f5);
+	dodecahedron.push(f6);
+
+	// get the next ring
+
+	const f7 = find_dodeca_next(faces, dodecahedron, f6, f2);
+	dodecahedron.push(f7);
+	const f8 = find_dodeca_next(faces, dodecahedron, f2, f3);
+	dodecahedron.push(f8);
+	const f9 = find_dodeca_next(faces, dodecahedron, f3, f4);
+	dodecahedron.push(f9);
+	const f10 = find_dodeca_next(faces, dodecahedron, f4, f5);
+	dodecahedron.push(f10);
+	const f11 = find_dodeca_next(faces, dodecahedron, f5, f6);
+	dodecahedron.push(f11);
+
+	// get the last
+
+	const f12 = find_dodeca_next(faces, dodecahedron, f7, f8);
+	dodecahedron.push(f12);
+
+	return dodecahedron;
+}
 
 
 

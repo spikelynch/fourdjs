@@ -367,14 +367,8 @@ function naive_label_120cell(nodes, links, n) {
 	});
 }
 
-
-function manual_label_120cell(nodes, links) {
-
-	const faces = auto_120cell_faces(links);
-	const cfaces = [ 1, 2, 4, 145, 169 ];
-
+function label_faces_120cell(nodes, faces, cfaces, label) {
 	const ns = new Set();
-
 	for( const fid of cfaces ) {
 		const face = faces.filter((f)=> f.id === fid );
 		console.log(face);
@@ -386,7 +380,22 @@ function manual_label_120cell(nodes, links) {
 	}
 
 
-	label_nodes(nodes, Array.from(ns), 4);
+	label_nodes(nodes, Array.from(ns), label);
+}
+
+
+function manual_label_120cell(nodes, links) {
+
+	const faces = auto_120cell_faces(links);
+	//const cfaces = [ 1, 2, 4, 145, 169 ];
+
+
+	label_faces_120cell(nodes, faces, [
+    1,   2,   4, 169, 626,
+  145, 149, 553, 173, 171,
+  147, 554
+], 4);
+
 
 }
 
