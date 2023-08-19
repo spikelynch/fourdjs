@@ -259,3 +259,36 @@ function nice_icosa(nodes, icosa) {
 }
 
 
+function find_by_chord(nodesid, n, d) {
+	const EPSILON = 0.02;
+	return Object.keys(nodesid).filter((n1) => {
+		const d2 = dist2(nodesid[n1], nodesid[n]);
+		return Math.abs(d2 - d ** 2) < EPSILON;
+	});
+}
+
+
+function has_chord(n1, n2, d) {
+	const d2 = dist2(n1, n2);
+	const EPSILON = 0.01;
+	return Math.abs(d2 - d ** 2) < EPSILON;
+}
+
+
+function find_all_chords(nodes) {
+	const chords = {};
+	for( let i = 0; i < nodes.length - 1; i++ ) {
+		for( let j = i + 1; j < nodes.length; j++ ) {
+			const n1 = nodes[i];
+			const n2 = nodes[j];
+			const chord = Math.sqrt(dist2(n1, n2)).toFixed(5);
+			if( !(chord in chords) ) {
+				chords[chord] = [];
+			} 
+			chords[chord].push([n1, n2]);
+		}
+	}
+	return chords;
+}
+
+
