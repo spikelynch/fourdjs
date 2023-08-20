@@ -397,7 +397,7 @@ function make_120cell_cells(faces) {
 		for( const dd of dds ) {
 			const fp = dd_fingerprint(dd);
 			if( ! (fp in seen) ) {
-				console.log(`added dodeca ${fp}`);
+				//console.log(`added dodeca ${fp}`);
 				dodecas.push(dd);
 				seen[fp] = 1;
 			}
@@ -428,4 +428,13 @@ const cell120 = () => {
 const nodes = make_120cell_vertices();
 const links = auto_detect_edges(nodes, 4);
 const faces = auto_120cell_faces(links);
+const dodecas = make_120cell_cells(faces);
+
+const ddfaces = dodecas.map((dd) => dd.map((f) => f.id));
+
+console.log(JSON.stringify(ddfaces));
+
+// for( const dodeca of dodecas ) {
+// 	console.log(dodeca.map((f) => f.id)
+// }
 

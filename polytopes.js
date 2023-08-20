@@ -1,6 +1,6 @@
 import * as PERMUTE from './permute.js';
 
-import * as CELL120 from './cell120.js';
+import * as DODECAHEDRA from './dodecahedra.js';
 
 function index_nodes(nodes, scale) {
 	let i = 1;
@@ -293,7 +293,6 @@ function label_faces_120cell(nodes, faces, cfaces, label) {
 	console.log(`label faces from ${cfaces}`);
 	for( const fid of cfaces ) {
 		const face = faces.filter((f)=> f.id === fid );
-		console.log(face);
 		if( face.length > 0 ) {
 			for ( const nid of face[0].nodes ) {
 				ns.add(nid);
@@ -307,13 +306,12 @@ function label_faces_120cell(nodes, faces, cfaces, label) {
 function manual_label_120cell(nodes, links) {
 
 	const faces = auto_120cell_faces(links);
-	const dodecas = CELL120.make_120cell_dodecahedra(faces);
+	const dodecas = DODECAHEDRA.DODECAHEDRA;
 	//const cfaces = [ 1, 2, 4, 145, 169 ];
 
-	console.log(dodecas);
 	let colour = 1;
 	for( const dd of dodecas ) {
-		label_faces_120cell(nodes, faces, dd.map((f) => f.id), colour);
+		label_faces_120cell(nodes, faces, dd, colour);
 		colour++;
 		if( colour > 8 ) {
 			colour = 1;
