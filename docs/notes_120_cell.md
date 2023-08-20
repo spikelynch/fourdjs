@@ -1,4 +1,43 @@
 
+Steps forward -
+
+1. algorithm which, given a face, finds the two dodecahedra it belongs to
+
+2. using this, generate a list of all 120 dodecahedra:
+
+[ a b c d e f g h i j k l m n o p q r s t ] <- 20 vertices
+
+Check that each vertex appears in four of these
+
+Then - either manually start labelling them, or build an interface to help
+with the manual labelling
+
+
+
+1.
+
+For a face: there are five edges, and ten other faces sharing an edge.
+
+These edges are in two sets: one for each dodecahedron. The sets are defined
+by them sharing vertices which aren't in the first face.
+
+Go around a set of five, by pairs: for each pair, find the other neighbour - 
+
+this gives the next five faces.
+
+There's only one face left, which is defined by the shared other vertices of 
+the last five.
+
+
+
+
+
+
+
+
+
+/// old shit below that didn't work VVVV
+
 
 Chords: 1.74806 - the 120-cell has 7200 chords of this length
 

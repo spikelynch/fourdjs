@@ -1,5 +1,6 @@
-
 import * as PERMUTE from './permute.js';
+
+import * as DODECAHEDRA from './dodecahedra.js';
 
 function index_nodes(nodes, scale) {
 	let i = 1;
@@ -171,9 +172,82 @@ export const cell24 = () => {
 }
 
 
-// notes on coherent indexing
-// see table in https://en.wikipedia.org/wiki/120-cell - maybe adapt the
-// unit radius table
+// face detection for the 120-cell
+
+// NOTE: all of these return node ids, not nodes
+
+// return all the links which connect to a node
+
+function nodes_links(links, nodeid) {
+	return links.filter((l) => l.source === nodeid || l.target === nodeid);
+}
+
+// filter to remove a link to a given id from a set of links
+
+function not_to_this(link, nodeid) {
+	return !(link.source === nodeid || link.target === nodeid);
+}
+
+// given nodes n1, n2, return all neighbours of n2 which are not n1
+
+function unmutuals(links, n1id, n2id) {
+	const nlinks = nodes_links(links, n2id).filter((l) => not_to_this(l, n1id));
+	return nlinks.map((l) => {
+		if( l.source === n2id ) {
+			return l.target;
+		} else {
+			return l.source;
+		}
+	})
+}
+
+
+function fingerprint(ids) {
+	const sids = [...ids];
+	sids.sort();
+	return sids.join(',');
+}
+
+
+
+function auto_120cell_faces(links) {
+	const faces = [];
+	const seen = {};
+	let id = 1;
+	for( const edge of links ) {
+		const v1 = edge.source;
+		const v2 = edge.target;
+		const n1 = unmutuals(links, v2, v1);
+		const n2 = unmutuals(links, v1, v2);
+		const shared = [];
+		for( const a of n1 ) {
+			const an = unmutuals(links, v1, a);
+			for( const d of n2 ) {
+				const dn = unmutuals(links, v2, d);
+				for( const x of an ) {
+					for( const y of dn ) {
+						if( x == y ) {
+							shared.push([v1, a, x, d, v2])
+						}
+					}
+				}
+			}
+		}
+		if( shared.length !== 3 ) {
+			console.log(`Bad shared faces for ${edge.id} ${v1} ${v2}`);
+		}
+		for( const face of shared ) {
+			const fp = fingerprint(face);
+			if( !seen[fp] ) {
+				faces.push({ id: id, nodes: face });
+				id++;
+				seen[fp] = true;
+			}
+		}
+	}
+	return faces;
+}
+
 
 
 function make_120cell_vertices() {
@@ -185,13 +259,13 @@ function make_120cell_vertices() {
 
 	const nodes = [
 		PERMUTE.coordinates([0, 0, 2, 2],  0),
-		PERMUTE.coordinates([1, 1, 1, r5], 1),
-		PERMUTE.coordinates([phi, phi, phi, phi2inv], 2),
-		PERMUTE.coordinates([phiinv, phiinv, phiinv, phi2], 3),
+		PERMUTE.coordinates([1, 1, 1, r5], 0),
+		PERMUTE.coordinates([phi, phi, phi, phi2inv], 0),
+		PERMUTE.coordinates([phiinv, phiinv, phiinv, phi2], 0),
 
-		PERMUTE.coordinates([phi2, phi2inv, 1, 0], 4, true),
-		PERMUTE.coordinates([r5, phiinv, phi, 0], 5, true),
-		PERMUTE.coordinates([2, 1, phi, phiinv], 6, true),
+		PERMUTE.coordinates([phi2, phi2inv, 1, 0], 0, true),
+		PERMUTE.coordinates([r5, phiinv, phi, 0], 0, true),
+		PERMUTE.coordinates([2, 1, phi, phiinv], 0, true),
 		].flat();
 	index_nodes(nodes);
 	scale_nodes(nodes, 0.5);
@@ -206,17 +280,79 @@ function label_nodes(nodes, ids, label) {
 
 
 
+
+
+
+
+
+
+
+
+function label_faces_120cell(nodes, faces, cfaces, label) {
+	const ns = new Set();
+	console.log(`label faces from ${cfaces}`);
+	for( const fid of cfaces ) {
+		const face = faces.filter((f)=> f.id === fid );
+		if( face.length > 0 ) {
+			for ( const nid of face[0].nodes ) {
+				ns.add(nid);
+			}
+		}
+	}
+	label_nodes(nodes, Array.from(ns), label);
+}
+
+
+function manual_label_120cell(nodes, links) {
+
+	const faces = auto_120cell_faces(links);
+	const dodecas = DODECAHEDRA.DODECAHEDRA;
+	//const cfaces = [ 1, 2, 4, 145, 169 ];
+
+	let colour = 1;
+	for( const dd of dodecas ) {
+		label_faces_120cell(nodes, faces, dd, colour);
+		colour++;
+		if( colour > 8 ) {
+			colour = 1;
+		}
+	}
+
+// 	label_faces_120cell(nodes, faces, [
+//     1,   2,   4, 169, 626,
+//   145, 149, 553, 173, 171,
+//   147, 554
+// ], 2);
+
+// 	label_faces_120cell(nodes, faces, [
+//     1,   5,   3, 193, 641,
+//   217, 221, 565, 197, 195,
+//   219, 566
+// ], 3);
+
+}
+
+
+
+
+
+
+
+
+
 export const cell120 = () => {
 	const nodes  = make_120cell_vertices();
 	const links = auto_detect_edges(nodes, 4);
+
+	manual_label_120cell(nodes, links);
+
 	return {
 		nodes: nodes,
 		links: links,
 		geometry: {
 			node_size: 0.02,
 			link_size: 0.02
-		}
-
+		},
 	}
 }
 
@@ -404,7 +540,5 @@ export const cell600 = () => {
 		}
 	}
 }
-
-
 
 
