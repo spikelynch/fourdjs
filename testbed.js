@@ -295,6 +295,8 @@ function find_adjacent_faces(faces, face) {
 }
 
 
+
+
 function find_dodeca_mutuals(faces, f1, f2) {
 	// for any two adjacent faces, find their common neighbours where
 	// all three share exactly one vertex (this, I think, guarantees that
@@ -359,6 +361,26 @@ function make_dodecahedron(faces, f1, f2) {
 	return dodecahedron;
 }
 
+
+// for a face, pick an edge, and then find the other two faces which
+// share this edge. These can be used as the starting points for the
+// first face's two dodecahedra 
+
+function find_edge_neighbours(faces, face) {
+	const n1 = face.nodes[0];
+	const n2 = face.nodes[1];
+	return faces.filter((f) => f.id !== face.id && f.nodes.includes(n1) && f.nodes.includes(n2));
+}
+
+
+// each face is in two dodecahedra: this returns them both
+
+function face_to_dodecahedra(faces, f) {
+	const edge_friends = find_edge_neighbours(faces, f);
+	const d1 = make_dodecahedron(faces, f, edge_friends[0]);
+	const d2 = make_dodecahedron(faces, f, edge_friends[1]);
+	return [ d1, d2 ];
+}
 
 
 const cell120 = () => {
