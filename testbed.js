@@ -327,7 +327,6 @@ function find_dodeca_next(faces, dodeca, f1, f2) {
 
 function make_dodecahedron(faces, f1, f2) {
 	const dodecahedron = [ f1, f2 ];
-	console.log(`First two: ${f1.id} ${f2.id}`);
 
 	// take f1 as the 'center', get the other four around it from f2
 	const fs = find_dodeca_mutuals(faces, f1, f2);
@@ -380,6 +379,31 @@ function face_to_dodecahedra(faces, f) {
 	const d1 = make_dodecahedron(faces, f, edge_friends[0]);
 	const d2 = make_dodecahedron(faces, f, edge_friends[1]);
 	return [ d1, d2 ];
+}
+
+// brute-force calculation of all dodecahedra 
+
+function dd_fingerprint(dodecahedron) {
+	const ids = dodecahedron.map((face) => face.id);
+	ids.sort()
+	return ids.join(',');
+}
+
+function make_120cell_cells(faces) {
+	const dodecas = [];
+	const seen = {};
+	for( const face of faces ) {
+		const dds = face_to_dodecahedra(faces, face);
+		for( const dd of dds ) {
+			const fp = dd_fingerprint(dd);
+			if( ! (fp in seen) ) {
+				console.log(`added dodeca ${fp}`);
+				dodecas.push(dd);
+				seen[fp] = 1;
+			}
+		}
+	}
+	return dodecas;
 }
 
 
