@@ -303,7 +303,7 @@ function label_faces_120cell(nodes, faces, cfaces, label) {
 }
 
 
-function manual_label_120cell(nodes, links) {
+function basic_auto_label_120cell(nodes, links) {
 
 	const faces = auto_120cell_faces(links);
 	const dodecas = DODECAHEDRA.DODECAHEDRA;
@@ -332,7 +332,25 @@ function manual_label_120cell(nodes, links) {
 
 }
 
+// manual compound-of-tetrahedra colouring 
 
+function manual_label_120cell(nodes, links) {
+	label_nodes(nodes, [1, 153, 29, 105], 1);
+	label_nodes(nodes, [317, 409, 265, 109], 2);
+	label_nodes(nodes, [221, 337, 25, 509], 3);
+	label_nodes(nodes, [217, 413, 457, 361], 4);
+	label_nodes(nodes, [313, 157, 461, 505], 5);
+
+	// second dodecahedron needs to have opposite chirality
+
+	label_nodes(nodes, [ 165, 33, 117 ], 1);   
+	label_nodes(nodes, [ 161, 465, 517 ], 2);
+	label_nodes(nodes, [ 417, 469, 365 ], 3);
+	label_nodes(nodes, [ 341, 37, 513 ], 4);
+	label_nodes(nodes, [ 421, 269, 113 ], 5);
+
+
+}
 
 
 

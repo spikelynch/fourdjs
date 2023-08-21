@@ -432,7 +432,10 @@ const dodecas = make_120cell_cells(faces);
 
 const ddfaces = dodecas.map((dd) => dd.map((f) => f.id));
 
-console.log(JSON.stringify(ddfaces));
+//console.log(JSON.stringify(ddfaces));
+
+const dd0 = dodecas[0];
+
 
 // for( const dodeca of dodecas ) {
 // 	console.log(dodeca.map((f) => f.id)
