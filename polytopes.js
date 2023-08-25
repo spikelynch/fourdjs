@@ -341,6 +341,7 @@ function manual_label_120cell(nodes, links) {
 	label_nodes(nodes, [217, 413, 457, 361], 4);
 	label_nodes(nodes, [313, 157, 461, 505], 5);
 
+
 	// second dodecahedron needs to have opposite chirality
 
 	label_nodes(nodes, [ 165, 33, 117 ], 1);   
@@ -349,10 +350,38 @@ function manual_label_120cell(nodes, links) {
 	label_nodes(nodes, [ 341, 37, 513 ], 4);
 	label_nodes(nodes, [ 421, 269, 113 ], 5);
 
+	// third
+
+	label_nodes(nodes, [ 45, 101, 181 ], 1);   
+	label_nodes(nodes, [ 241, 429, 53 ], 2);
+	label_nodes(nodes, [ 93, 229 ], 3);
+	label_nodes(nodes, [ 173, 437 ], 4);
+	label_nodes(nodes, [ 245, 325 ], 5);
+
+	// fourth (id = 3)
+
+	label_nodes(nodes, [ 89, 169, 49 ], 1);   
+	label_nodes(nodes, [ 321 ], 2);
+	label_nodes(nodes, [ 425, 177 ], 3);
+	label_nodes(nodes, [ 97,  225 ], 4);
+	label_nodes(nodes, [ 41,  433], 5);
+
+
 
 }
 
-
+function semiautomatic_label_120cell(nodes, links) {
+	const COLOURS = {
+  		1: [ 313, 157, 461, 505 ],
+  		2: [ 1, 153, 29, 105 ],
+  		3: [ 317, 409, 265, 109 ],
+  		4: [ 221, 337, 25, 509 ],
+  		5: [ 217, 413, 457, 361 ]
+	};
+	for( const col in COLOURS ) {
+		label_nodes(nodes, COLOURS[col], col);
+	}
+}
 
 
 
@@ -362,7 +391,7 @@ export const cell120 = () => {
 	const nodes  = make_120cell_vertices();
 	const links = auto_detect_edges(nodes, 4);
 
-	manual_label_120cell(nodes, links);
+	semiautomatic_label_120cell(nodes, links);
 
 	return {
 		nodes: nodes,

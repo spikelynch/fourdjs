@@ -360,6 +360,107 @@ function make_dodecahedron(faces, f1, f2) {
 	return dodecahedron;
 }
 
+// goal - a version of the above which collates the nodes to 
+// a standard 'layout' on the dodecahedron, so that it's then easy
+// to colour them automatically
+
+
+
+
+
+
+
+
+
+function faces_to_dodecahedron(faces, f1, f2) {
+	const dodecahedron = [ f1, f2 ];
+
+	// take f1 as the 'center', get the other four around it from f2
+	const fs = find_dodeca_mutuals(faces, f1, f2);
+	const f3 = fs[0];
+	const f6 = fs[1];
+	dodecahedron.push(f3);
+	const f4 = find_dodeca_next(faces, dodecahedron, f1, f3);
+	dodecahedron.push(f4);
+	const f5 = find_dodeca_next(faces, dodecahedron, f1, f4);
+	dodecahedron.push(f5);
+	dodecahedron.push(f6);
+
+	// get the next ring
+
+	const f7 = find_dodeca_next(faces, dodecahedron, f6, f2);
+	dodecahedron.push(f7);
+	const f8 = find_dodeca_next(faces, dodecahedron, f2, f3);
+	dodecahedron.push(f8);
+	const f9 = find_dodeca_next(faces, dodecahedron, f3, f4);
+	dodecahedron.push(f9);
+	const f10 = find_dodeca_next(faces, dodecahedron, f4, f5);
+	dodecahedron.push(f10);
+	const f11 = find_dodeca_next(faces, dodecahedron, f5, f6);
+	dodecahedron.push(f11);
+
+	// get the last
+
+	const f12 = find_dodeca_next(faces, dodecahedron, f7, f8);
+	dodecahedron.push(f12);
+
+	return dodecahedron;
+}
+
+// for three faces, return their common vertex (if they have one)
+
+function find_dodeca_vertex(f1, f2, f3) {
+	const v12 = f1.nodes.filter((n) => f2.nodes.includes(n));
+	const v123 = v12.filter((n) => f3.nodes.includes(n));
+	if( v123.length === 1 ) {
+		return v123[0];
+	} else {
+		console.log(`warning: faces ${f1.id} ${f2.id} ${f3.id} don't share 1 vertex`);
+		return false;
+	}
+}
+
+
+function dodecahedron_vertices(dodeca) {
+	const VERTEX_MAP = [
+		[ 0, 1, 5 ],
+		[ 0, 1, 2 ],
+		[ 0, 2, 3 ],
+		[ 0, 3, 4 ],
+		[ 0, 4, 5 ],
+		[ 1, 5, 6 ],
+		[ 1, 2, 7 ],
+		[ 2, 3, 8 ],
+		[ 3, 4, 9 ],
+		[ 4, 5, 10 ],
+		[ 1, 6, 7 ],
+		[ 2, 7, 8 ],
+		[ 3, 8, 9 ],
+		[ 4, 9, 10 ],
+		[ 5, 6, 10 ],
+		[ 6, 7, 11 ],
+		[ 7, 8, 11 ],
+		[ 8, 9, 11 ],
+		[ 9, 10, 11 ],
+		[ 6, 10, 11 ],
+	];
+	return VERTEX_MAP.map((vs) => find_dodeca_vertex(...vs.map((v) => dd[v])));
+}
+
+function dodecahedron_colours(vertices, left) {
+	const PARTITION = [
+		1, 2, 3, 4, 5,   3, 4, 5, 1, 2,   5, 1, 2, 3, 4,   2, 3, 4, 5, 1,
+		];
+	const colours = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+	for( let i = 0; i < 20; i++ ) {
+		colours[PARTITION[i]].push(vertices[i]);
+	}
+	return colours;
+}
+
+
+
+
 
 // for a face, pick an edge, and then find the other two faces which
 // share this edge. These can be used as the starting points for the
@@ -392,13 +493,20 @@ function dd_fingerprint(dodecahedron) {
 function make_120cell_cells(faces) {
 	const dodecas = [];
 	const seen = {};
+	let i = 1;
 	for( const face of faces ) {
 		const dds = face_to_dodecahedra(faces, face);
 		for( const dd of dds ) {
 			const fp = dd_fingerprint(dd);
 			if( ! (fp in seen) ) {
 				//console.log(`added dodeca ${fp}`);
-				dodecas.push(dd);
+				const d = {
+					id: i,
+					faces: dd
+				}
+				dodeca_nodes(d);
+				dodecas.push(d);
+				i += 1;
 				seen[fp] = 1;
 			}
 		}
@@ -422,22 +530,20 @@ const cell120 = () => {
 }
 
 
+function dodeca_nodes(dd) {
+	const ns = new Set();
+	for( const face of dd.faces ) {
+		for( const node of face.nodes ) {
+			ns.add(node);
+		}
+	}
+	dd.nodes = Array.from(ns);
+}
 
 
 
 const nodes = make_120cell_vertices();
 const links = auto_detect_edges(nodes, 4);
 const faces = auto_120cell_faces(links);
-const dodecas = make_120cell_cells(faces);
-
-const ddfaces = dodecas.map((dd) => dd.map((f) => f.id));
-
-//console.log(JSON.stringify(ddfaces));
-
-const dd0 = dodecas[0];
-
-
-// for( const dodeca of dodecas ) {
-// 	console.log(dodeca.map((f) => f.id)
-// }
+//const dodecas = make_120cell_cells(faces);
 

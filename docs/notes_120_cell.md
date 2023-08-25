@@ -5,13 +5,6 @@ Steps forward -
 
 2. using this, generate a list of all 120 dodecahedra:
 
-[ a b c d e f g h i j k l m n o p q r s t ] <- 20 vertices
-
-Check that each vertex appears in four of these
-
-Then - either manually start labelling them, or build an interface to help
-with the manual labelling
-
 
 
 1.
@@ -30,7 +23,31 @@ the last five.
 
 
 
+2. have tried manual labelling and it will drive me crazy before I finish
 
+3. Automated approach based on what I've got so far:
+
+- should be possible to colour a single dodecahedron from a single face and
+  one other vertex (to pick a chirality)
+
+- write a function to do this - the compound-of-four-tetrahedra map can be
+  more or less hard coded: follow the pattern 1-2-3-4-5, 3-4-5-1-2, etc out
+  from the inner ring, and map the original face's permutation
+
+From this:
+
+- colour the first dodecahedron, picking a chirality
+
+- the next vertices from each of this dodecahedron's vertices have colours
+  which come from the first dodeca
+
+- these can be used to colour the next layer of dodecahedra 
+
+- and so on 
+
+Alternatively:
+
+- do it by the discrete Hopf fibration, one fibre at a time
 
 
 
