@@ -303,7 +303,7 @@ function label_faces_120cell(nodes, faces, cfaces, label) {
 }
 
 
-function manual_label_120cell(nodes, links) {
+function basic_auto_label_120cell(nodes, links) {
 
 	const faces = auto_120cell_faces(links);
 	const dodecas = DODECAHEDRA.DODECAHEDRA;
@@ -332,11 +332,118 @@ function manual_label_120cell(nodes, links) {
 
 }
 
+// manual compound-of-tetrahedra colouring 
+
+function manual_label_120cell(nodes, links) {
+	label_nodes(nodes, [1, 153, 29, 105], 1);
+	label_nodes(nodes, [317, 409, 265, 109], 2);
+	label_nodes(nodes, [221, 337, 25, 509], 3);
+	label_nodes(nodes, [217, 413, 457, 361], 4);
+	label_nodes(nodes, [313, 157, 461, 505], 5);
+
+
+	// second dodecahedron needs to have opposite chirality
+
+	label_nodes(nodes, [ 165, 33, 117 ], 1);   
+	label_nodes(nodes, [ 161, 465, 517 ], 2);
+	label_nodes(nodes, [ 417, 469, 365 ], 3);
+	label_nodes(nodes, [ 341, 37, 513 ], 4);
+	label_nodes(nodes, [ 421, 269, 113 ], 5);
+
+	// third
+
+	label_nodes(nodes, [ 45, 101, 181 ], 1);   
+	label_nodes(nodes, [ 241, 429, 53 ], 2);
+	label_nodes(nodes, [ 93, 229 ], 3);
+	label_nodes(nodes, [ 173, 437 ], 4);
+	label_nodes(nodes, [ 245, 325 ], 5);
+
+	// fourth (id = 3)
+
+	label_nodes(nodes, [ 89, 169, 49 ], 1);   
+	label_nodes(nodes, [ 321 ], 2);
+	label_nodes(nodes, [ 425, 177 ], 3);
+	label_nodes(nodes, [ 97,  225 ], 4);
+	label_nodes(nodes, [ 41,  433], 5);
 
 
 
+}
 
+function meridian_label_120cell(nodes, links) {
 
+			const DODECAS = [
+			  [
+			    313,   1, 317, 221, 217, 417,
+			    341, 421, 165, 161, 465, 469,
+			     37, 269,  33, 113, 117, 517,
+			    365, 513
+			  ],
+			  [
+			    513, 365, 517, 117, 113, 577,
+			     15, 581, 565, 561, 397, 399,
+			     85, 389,  81, 301, 303, 213,
+			    293, 209
+			  ],
+			  [
+			    301, 209, 293, 213, 303,
+			    211, 309, 294, 311, 215,
+			    310, 210, 214, 312, 295,
+			    212, 302, 304, 216, 296
+			  ],
+			  [
+			    304, 302, 212, 296, 216, 400,
+			    398,  84, 392,  88,  16, 580,
+			    564, 568, 584, 368, 516, 116,
+			    120, 520
+			  ],
+			  [
+			    368, 516, 116, 120, 520, 272,
+			     36, 468, 472,  40, 164, 420,
+			    344, 424, 168, 220, 316,   4,
+			    320, 224
+			  ],
+			  [
+			    316,   4, 320, 224, 220, 412,
+			    340, 416, 160, 156, 460, 464,
+			     32, 268,  28, 108, 112, 512,
+			    364, 508
+			  ],
+			  [
+			    508, 364, 512, 112, 108, 572,
+			     14, 576, 560, 556, 394, 396,
+			     80, 388,  76, 298, 300, 208,
+			    292, 204
+			  ],
+			  [
+			    300, 298, 204, 292, 208,
+			    206, 202, 306, 291, 308,
+			    290, 305, 203, 207, 307,
+			    289, 201, 297, 299, 205
+			  ],
+			  [
+			    299, 297, 201, 289, 205, 395,
+			    393,  73, 385,  77,  13, 569,
+			    553, 557, 573, 361, 505, 105,
+			    109, 509
+			  ],
+			  [
+			    361, 505, 105, 109, 509, 265,
+			     25, 457, 461,  29, 153, 409,
+			    337, 413, 157, 217, 313,   1,
+			    317, 221
+			  ]
+			]
+
+		let col = 1;
+		for( const dd of DODECAS ) {
+			label_nodes(nodes, dd, 5);
+			col++;
+			if( col > 5 ) {
+				col = 1;
+			}
+	}
+}
 
 
 
@@ -344,7 +451,7 @@ export const cell120 = () => {
 	const nodes  = make_120cell_vertices();
 	const links = auto_detect_edges(nodes, 4);
 
-	manual_label_120cell(nodes, links);
+	meridian_label_120cell(nodes, links);
 
 	return {
 		nodes: nodes,
