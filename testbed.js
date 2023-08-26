@@ -479,6 +479,27 @@ function colour_one_dodecahedron(faces, face, node, p) {
 }
 
 
+// go along a meridian
+
+function meridian(faces, startf, startn) {
+	const dds =  [ face_plus_to_dodecahedron(faces, startf, startn) ];
+
+	while( dds.length < 10 ) {
+		const dd = dds[dds.length - 1];
+		const nextf = dd[11]; // opposite to startf
+		const neighbours = find_adjacent_faces(faces, nextf);
+		const nextnbors = neighbours.filter((f) => !dd.includes(f));
+
+		const nextdd = faces_to_dodecahedron(faces, nextf, nextnbors[0]);
+
+
+		dds.push(nextdd);
+	}
+
+	return dds;
+
+}
+
 
 
 
