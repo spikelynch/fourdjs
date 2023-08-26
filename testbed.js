@@ -360,17 +360,6 @@ function make_dodecahedron(faces, f1, f2) {
 	return dodecahedron;
 }
 
-// goal - a version of the above which collates the nodes to 
-// a standard 'layout' on the dodecahedron, so that it's then easy
-// to colour them automatically
-
-
-
-
-
-
-
-
 
 function faces_to_dodecahedron(faces, f1, f2) {
 	const dodecahedron = [ f1, f2 ];
@@ -407,6 +396,17 @@ function faces_to_dodecahedron(faces, f1, f2) {
 	return dodecahedron;
 }
 
+// from a face and one neighbouring node, return a dodecahedron
+
+function face_plus_to_dodecahedron(faces, f1, node) {
+	const neighbours = find_adjacent_faces(faces, f1);
+	const nodens = neighbours.filter((f) => f.nodes.includes(node));
+	return faces_to_dodecahedron(faces, f1, nodens[0]); // does it matter which?
+}
+
+
+
+
 // for three faces, return their common vertex (if they have one)
 
 function find_dodeca_vertex(f1, f2, f3) {
@@ -420,42 +420,62 @@ function find_dodeca_vertex(f1, f2, f3) {
 	}
 }
 
+const VERTEX_MAP = [
+	[ 0, 1, 5 ],
+	[ 0, 1, 2 ],
+	[ 0, 2, 3 ],
+	[ 0, 3, 4 ],
+	[ 0, 4, 5 ],
+	[ 1, 5, 6 ],
+	[ 1, 2, 7 ],
+	[ 2, 3, 8 ],
+	[ 3, 4, 9 ],
+	[ 4, 5, 10 ],
+	[ 1, 6, 7 ],
+	[ 2, 7, 8 ],
+	[ 3, 8, 9 ],
+	[ 4, 9, 10 ],
+	[ 5, 6, 10 ],
+	[ 6, 7, 11 ],
+	[ 7, 8, 11 ],
+	[ 8, 9, 11 ],
+	[ 9, 10, 11 ],
+	[ 6, 10, 11 ],
+];
 
-function dodecahedron_vertices(dodeca) {
-	const VERTEX_MAP = [
-		[ 0, 1, 5 ],
-		[ 0, 1, 2 ],
-		[ 0, 2, 3 ],
-		[ 0, 3, 4 ],
-		[ 0, 4, 5 ],
-		[ 1, 5, 6 ],
-		[ 1, 2, 7 ],
-		[ 2, 3, 8 ],
-		[ 3, 4, 9 ],
-		[ 4, 5, 10 ],
-		[ 1, 6, 7 ],
-		[ 2, 7, 8 ],
-		[ 3, 8, 9 ],
-		[ 4, 9, 10 ],
-		[ 5, 6, 10 ],
-		[ 6, 7, 11 ],
-		[ 7, 8, 11 ],
-		[ 8, 9, 11 ],
-		[ 9, 10, 11 ],
-		[ 6, 10, 11 ],
-	];
-	return VERTEX_MAP.map((vs) => find_dodeca_vertex(...vs.map((v) => dd[v])));
+
+
+function dodecahedron_vertices(faces) {
+	const face_sets = VERTEX_MAP.map((vs) => vs.map((v) => faces[v]));
+	return face_sets.map((fs) => find_dodeca_vertex(...fs));
 }
 
-function dodecahedron_colours(vertices, left) {
-	const PARTITION = [
+// p is the permutation of the first face
+
+function dodecahedron_colours(vertices, p) {
+	const LEFT_PART = [
 		1, 2, 3, 4, 5,   3, 4, 5, 1, 2,   5, 1, 2, 3, 4,   2, 3, 4, 5, 1,
 		];
-	const colours = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+	const RIGHT_PART = [
+		1, 2, 3, 4, 5,   4, 5, 1, 2, 3,   3, 4, 5, 1, 2,   1, 2, 3, 4, 5,
+		];
+	const part = LEFT_PART;
+	const colours = {};
 	for( let i = 0; i < 20; i++ ) {
-		colours[PARTITION[i]].push(vertices[i]);
+		const v = vertices[i];
+		const colour = p[part[i] - 1];
+		colours[v] = colour;
 	}
 	return colours;
+}
+
+
+// p is the permutation of the first face
+
+function colour_one_dodecahedron(faces, face, node, p) {
+	const dd = face_plus_to_dodecahedron(faces, face, node);
+	const vertices = dodecahedron_vertices(dd);
+	return dodecahedron_colours(vertices, p);
 }
 
 
@@ -502,9 +522,9 @@ function make_120cell_cells(faces) {
 				//console.log(`added dodeca ${fp}`);
 				const d = {
 					id: i,
-					faces: dd
+					faces: dd,
+					nodes: dodecahedron_vertices(dd),
 				}
-				dodeca_nodes(d);
 				dodecas.push(d);
 				i += 1;
 				seen[fp] = 1;
