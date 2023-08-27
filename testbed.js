@@ -471,7 +471,6 @@ function find_adjacent_nodes(links, nid) {
 function colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextdd) {
 	const lastvs = dodecahedron_vertices(dd);
 	const nextvs = dodecahedron_vertices(nextdd);
-	console.log(`maybe: vertices = ${nextvs}`);
 	// get the initial colour permutations from the existing labels;
 	const p = [];
 	for( i = 0; i < 5; i ++ ) {
@@ -487,9 +486,9 @@ function colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextd
 	const nextcol = nlabels[nextns[0]];
 	if( lastcol === nextcol ) {
 		// one node in the adjoining face has two same-coloured neighbours
-		console.log('chirality mismatch');
-		console.log(`   test node ${n}`);
-		console.log(`   neighbours ${lastns[0]} ${nextns[0]}`);
+		// console.log('chirality mismatch');
+		// console.log(`   test node ${n}`);
+		// console.log(`   neighbours ${lastns[0]} ${nextns[0]}`);
 		return false;
 	}
 	return nlabels;
@@ -499,23 +498,56 @@ function colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextd
 
 
 
+
+function meridian(nodes, links, faces, startf, startn, dir=11, max=10) {
+	const o =  face_plus_to_dodecahedron(faces, startf, startn);
+
+	const colours = colour_dodecahedron_from_face(o, [ 1, 2, 3, 4, 5 ] );
+
+	const dds = follow_meridian(nodes, links, faces, colours, o, dir, max);
+
+	const labels = { 1: [], 2:[], 3:[], 4:[], 5:[] };
+	for( const vstr in colours ) {
+		labels[colours[vstr]].push(Number(vstr));
+	}
+
+	return { dodecahedra: dds, labels: labels };
+
+}
+
+
+function all_meridians(nodes, links, faces, startf, startn) {
+	const o =  face_plus_to_dodecahedron(faces, startf, startn);
+
+	const colours = colour_dodecahedron_from_face(o, [ 1, 2, 3, 4, 5 ] );
+
+	// first meridian 
+	const dds = follow_meridian(nodes, links, faces, colours, o, 11, 10);
+	for ( const f of [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] ) {
+		follow_meridian(nodes, links, faces, colours, o, f, 4);
+	}
+
+	const labels = { 1: [], 2:[], 3:[], 4:[], 5:[] };
+	for( const vstr in colours ) {
+		labels[colours[vstr]].push(Number(vstr));
+	}
+
+	return labels;
+
+}
+
+
+
+
 // go along a meridian
+// modifies colours 
 
-function meridian(nodes, links, faces, startf, startn, max) {
-	console.log(startf);
-	const dds =  [ face_plus_to_dodecahedron(faces, startf, startn) ];
-
-	// colour first cell
-
-	const colours = colour_dodecahedron_from_face(dds[0], [ 1, 2, 3, 4, 5 ] );
-	const vs = dodecahedron_vertices(dds[0]);
-	console.log(`vertices: ${vs}`);
-
+function follow_meridian(nodes, links, faces, colours, odd, dir, max) {
 	let ncolours = {};
-
+	const dds = [ odd ];
 	while( ncolours && dds.length < max ) {
 		const dd = dds[dds.length - 1];
-		const nextf = dd[11]; // opposite to startf
+		const nextf = dds.length === 1 ? dd[dir] : dd[11]; 
 
 		let nextdd = follow_face_to_dodeca(faces, dd, nextf);
 		ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextdd);
@@ -524,19 +556,51 @@ function meridian(nodes, links, faces, startf, startn, max) {
 			nextdd = follow_face_to_dodeca(faces, dd, nextf, true);
 			ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextdd);
 			if( !ncolours ) {
+				console.log("*** two mismatches");
+			}
+		}
+
+		for( const vertex in ncolours ) {
+			if( vertex in colours ) {
+				if( colours[vertex] !== ncolours[vertex] ) {
+					console.log(`*** label mismatch at ${vertex}: ${colours[vertex]}/${ncolours[vertex]}`);
+				}
+			} else {
+				colours[vertex] = ncolours[vertex];
+			}
+		}
+		dds.push(nextdd);
+	}
+	return dds;
+}
+
+
+
+// "arctic circle" - this one works
+
+function arctic(nodes, links, faces, startf, startn, max) {
+	console.log(startf);
+	const pole = face_plus_to_dodecahedron(faces, startf, startn);
+	const dds = [ pole ];
+	// colour first cell
+
+	const colours = colour_dodecahedron_from_face(dds[0], [ 1, 2, 3, 4, 5 ] );
+	const vs = dodecahedron_vertices(dds[0]);
+
+	let ncolours = {};
+
+	for( const face of pole ) {
+
+		let nextdd = follow_face_to_dodeca(faces, pole, face);
+		ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, pole, face, nextdd);
+
+		if( !ncolours ) {
+			nextdd = follow_face_to_dodeca(faces, pole, face, true);
+			ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, pole, face, nextdd);
+			if( !ncolours ) {
 				console.log("two mismatches");
 			}
-
 		}
-		// const nextvs = dodecahedron_vertices(nextdd);
-		// // get the initial colour permutations from the existing labels;
-		// const p = [];
-		// for( i = 0; i < 5; i ++ ) {
-		// 	p[i] = labels[nextvs[i]];
-		// }
-		// console.log(`vertices: ${nextvs}`);
-		// console.log(`Next colour permutation ${p}`);
-		// const nlabels = colour_dodecahedron_from_face(nextdd, p);
 		for( const vertex in ncolours ) {
 			if( vertex in colours ) {
 				if( colours[vertex] !== ncolours[vertex] ) {
@@ -564,8 +628,64 @@ function meridian(nodes, links, faces, startf, startn, max) {
 
 
 
+// this one breaks but I don't know if it's because of the traversal
+// algorithm or the indexing algorithm
 
-function collate_labels(labels) {
+function whole_120_cell(nodes, links, faces, startf, startn, max) {
+
+	const pole = face_plus_to_dodecahedron(faces, startf, startn);
+	const dds = [ pole ];
+	const queue = [ pole ];
+	const seen = {};
+
+	// colour first cell
+
+	const colours = colour_dodecahedron_from_face(pole, [ 1, 2, 3, 4, 5 ] );
+
+	let ncolours = {};
+
+	while( ncolours && queue.length > 0 ) {
+		const dd = queue.shift();
+		for( const face of dd ) {
+			let nextdd = follow_face_to_dodeca(faces, dd, face);
+			const fp = dd_fingerprint(nextdd);
+			if( ! (fp in seen) ) {
+				seen[fp] = true;
+				ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, pole, face, nextdd);
+
+				if( !ncolours ) {
+					nextdd = follow_face_to_dodeca(faces, pole, face, true);
+					ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, pole, face, nextdd);
+					if( !ncolours ) {
+						console.log("two mismatches");
+					}
+				}
+				for( const vertex in ncolours ) {
+					if( vertex in colours ) {
+						if( colours[vertex] !== ncolours[vertex] ) {
+							console.log(`label mismatch at ${vertex}: ${colours[vertex]}/${ncolours[vertex]}`);
+						}
+					} else {
+						colours[vertex] = ncolours[vertex];
+					}
+				}
+				dds.push(nextdd);
+				queue.push(nextdd);
+			}
+		}
+	}
+
+
+	const labels = { 1: [], 2:[], 3:[], 4:[], 5:[] };
+	for( const vstr in colours ) {
+		labels[colours[vstr]].push(Number(vstr));
+	}
+
+
+	return { dodecahedra: dds, labels: labels };
+
+
+
 }
 
 
@@ -624,6 +744,28 @@ function make_120cell_cells(faces) {
 }
 
 
+
+function dodeca_travers(nodes, links, n, fn) {
+	const queue = [];
+	const seen = {};
+	const nodes_id = {};
+
+	queue.push(n.id);
+
+	while( queue.length > 0 ) {
+		const v = queue.shift();
+		find_adjacent(links, v).map((aid) => {
+			if( !(aid in seen) ) {
+				seen[aid] = true;
+				queue.push(aid);
+				fn(nodes_id[aid]);
+			}
+		})
+	}
+}
+
+
+
 const cell120 = () => {
 	const nodes  = make_120cell_vertices();
 	const links = auto_detect_edges(nodes, 4);
@@ -656,3 +798,6 @@ const links = auto_detect_edges(nodes, 4);
 const faces = auto_120cell_faces(links);
 //const dodecas = make_120cell_cells(faces);
 
+const colours = all_meridians(nodes, links, faces, faces[0], 341);
+
+console.log(JSON.stringify(colours));
