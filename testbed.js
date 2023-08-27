@@ -323,51 +323,14 @@ function find_dodeca_next(faces, dodeca, f1, f2) {
 	return m[0];
 }
 
-// from any two mutual faces, return all the faces in their dodecahedron
 
-function make_dodecahedron(faces, f1, f2) {
+function faces_to_dodecahedron(faces, f1, f2, flip=false) {
 	const dodecahedron = [ f1, f2 ];
 
 	// take f1 as the 'center', get the other four around it from f2
 	const fs = find_dodeca_mutuals(faces, f1, f2);
-	const f3 = fs[0];
-	const f6 = fs[1];
-	dodecahedron.push(f3);
-	const f4 = find_dodeca_next(faces, dodecahedron, f1, f3);
-	dodecahedron.push(f4);
-	const f5 = find_dodeca_next(faces, dodecahedron, f1, f4);
-	dodecahedron.push(f5);
-	dodecahedron.push(f6);
-
-	// get the next ring
-
-	const f7 = find_dodeca_next(faces, dodecahedron, f6, f2);
-	dodecahedron.push(f7);
-	const f8 = find_dodeca_next(faces, dodecahedron, f2, f3);
-	dodecahedron.push(f8);
-	const f9 = find_dodeca_next(faces, dodecahedron, f3, f4);
-	dodecahedron.push(f9);
-	const f10 = find_dodeca_next(faces, dodecahedron, f4, f5);
-	dodecahedron.push(f10);
-	const f11 = find_dodeca_next(faces, dodecahedron, f5, f6);
-	dodecahedron.push(f11);
-
-	// get the last
-
-	const f12 = find_dodeca_next(faces, dodecahedron, f7, f8);
-	dodecahedron.push(f12);
-
-	return dodecahedron;
-}
-
-
-function faces_to_dodecahedron(faces, f1, f2) {
-	const dodecahedron = [ f1, f2 ];
-
-	// take f1 as the 'center', get the other four around it from f2
-	const fs = find_dodeca_mutuals(faces, f1, f2);
-	const f3 = fs[0];
-	const f6 = fs[1];
+	const f3 = flip ? fs[1] : fs[0];
+	const f6 = flip ? fs[0] : fs[1];
 	dodecahedron.push(f3);
 	const f4 = find_dodeca_next(faces, dodecahedron, f1, f3);
 	dodecahedron.push(f4);
@@ -397,11 +360,13 @@ function faces_to_dodecahedron(faces, f1, f2) {
 }
 
 // from a face and one neighbouring node, return a dodecahedron
+// Set 'flip' to true if we're coming to this dodecahedron from a
+// face on a previous one so that the chirality doesn't get inverted
 
-function face_plus_to_dodecahedron(faces, f1, node) {
+function face_plus_to_dodecahedron(faces, f1, node, flip=false) {
 	const neighbours = find_adjacent_faces(faces, f1);
 	const nodens = neighbours.filter((f) => f.nodes.includes(node));
-	return faces_to_dodecahedron(faces, f1, nodens[0]); // does it matter which?
+	return faces_to_dodecahedron(faces, f1, nodens[0], flip); // does it matter which?
 }
 
 
@@ -472,32 +437,135 @@ function dodecahedron_colours(vertices, p) {
 
 // p is the permutation of the first face
 
-function colour_one_dodecahedron(faces, face, node, p) {
-	const dd = face_plus_to_dodecahedron(faces, face, node);
+function colour_dodecahedron_from_face(dd, p) {
 	const vertices = dodecahedron_vertices(dd);
 	return dodecahedron_colours(vertices, p);
 }
 
+// from a dodecahedron and a face, get the adjoining dodecahedron
+
+function follow_face_to_dodeca(faces, startdd, nextf, flip=false) {
+	const neighbours = find_adjacent_faces(faces, nextf);
+	const nextnbors = neighbours.filter((f) => !startdd.includes(f));
+	return faces_to_dodecahedron(faces, nextf, nextnbors[0], flip);
+}
+
+
+function find_edges(links, nid) {
+	return links.filter((l) => l.source === nid || l.target === nid );
+}
+
+
+function find_adjacent_nodes(links, nid) {
+	return find_edges(links, nid).map((l) => {
+		if( l.source === nid ) {
+			return l.target;
+		} else {
+			return l.source;
+		}
+	});
+}
+
+
+
+function colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextdd) {
+	const lastvs = dodecahedron_vertices(dd);
+	const nextvs = dodecahedron_vertices(nextdd);
+	console.log(`maybe: vertices = ${nextvs}`);
+	// get the initial colour permutations from the existing labels;
+	const p = [];
+	for( i = 0; i < 5; i ++ ) {
+		p[i] = colours[nextvs[i]];
+	}
+	const nlabels = colour_dodecahedron_from_face(nextdd, p);
+	// check if this is inconsistent with the original dd
+	const n = nextf.nodes[0];
+	const nbors = find_adjacent_nodes(links, n);
+	const nextns = nbors.filter((n) => !lastvs.includes(n));
+	const lastns = nbors.filter((n) => !nextvs.includes(n));
+	const lastcol = colours[lastns[0]];
+	const nextcol = nlabels[nextns[0]];
+	if( lastcol === nextcol ) {
+		// one node in the adjoining face has two same-coloured neighbours
+		console.log('chirality mismatch');
+		console.log(`   test node ${n}`);
+		console.log(`   neighbours ${lastns[0]} ${nextns[0]}`);
+		return false;
+	}
+	return nlabels;
+}
+
+
+
+
 
 // go along a meridian
 
-function meridian(faces, startf, startn) {
+function meridian(nodes, links, faces, startf, startn, max) {
+	console.log(startf);
 	const dds =  [ face_plus_to_dodecahedron(faces, startf, startn) ];
 
-	while( dds.length < 10 ) {
+	// colour first cell
+
+	const colours = colour_dodecahedron_from_face(dds[0], [ 1, 2, 3, 4, 5 ] );
+	const vs = dodecahedron_vertices(dds[0]);
+	console.log(`vertices: ${vs}`);
+
+	let ncolours = {};
+
+	while( ncolours && dds.length < max ) {
 		const dd = dds[dds.length - 1];
 		const nextf = dd[11]; // opposite to startf
-		const neighbours = find_adjacent_faces(faces, nextf);
-		const nextnbors = neighbours.filter((f) => !dd.includes(f));
 
-		const nextdd = faces_to_dodecahedron(faces, nextf, nextnbors[0]);
+		let nextdd = follow_face_to_dodeca(faces, dd, nextf);
+		ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextdd);
 
+		if( !ncolours ) {
+			nextdd = follow_face_to_dodeca(faces, dd, nextf, true);
+			ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextdd);
+			if( !ncolours ) {
+				console.log("two mismatches");
+			}
 
+		}
+		// const nextvs = dodecahedron_vertices(nextdd);
+		// // get the initial colour permutations from the existing labels;
+		// const p = [];
+		// for( i = 0; i < 5; i ++ ) {
+		// 	p[i] = labels[nextvs[i]];
+		// }
+		// console.log(`vertices: ${nextvs}`);
+		// console.log(`Next colour permutation ${p}`);
+		// const nlabels = colour_dodecahedron_from_face(nextdd, p);
+		for( const vertex in ncolours ) {
+			if( vertex in colours ) {
+				if( colours[vertex] !== ncolours[vertex] ) {
+					console.log(`label mismatch at ${vertex}: ${colours[vertex]}/${ncolours[vertex]}`);
+				}
+			} else {
+				colours[vertex] = ncolours[vertex];
+			}
+		}
 		dds.push(nextdd);
 	}
 
-	return dds;
 
+	const labels = { 1: [], 2:[], 3:[], 4:[], 5:[] };
+	for( const vstr in colours ) {
+		labels[colours[vstr]].push(Number(vstr));
+	}
+
+
+	return { dodecahedra: dds, labels: labels };
+
+
+
+}
+
+
+
+
+function collate_labels(labels) {
 }
 
 
