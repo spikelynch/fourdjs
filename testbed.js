@@ -688,10 +688,12 @@ function arctic_two(nodes, links, faces, startf, startn) {
 		seen[dd_fingerprint(nextdd)] = true;
 	}
 
-	// dumb!
-	// top five of the temperate circle
-	const a1 = dds[1];
-	for( const a of dds.slice(1, 12) ) {
+	// go around all of the arctic circle and grow all faces
+
+    // 1, 12, 20, 12, 30 = 75
+    // 0  1   13, 33, 45
+
+	for( const a of dds.slice(1, 13) ) {
 		for( const i of [ 6, 7, 8, 9, 10 ] ) {
 			const [ nextdd, ncolours ] = follow_and_colour(
 				nodes, links, faces, colours, a, a[i]
@@ -705,32 +707,63 @@ function arctic_two(nodes, links, faces, startf, startn) {
 		}
 	}
 
-	// // bottom five of the temperate circle
-	// const a12 = dds[12];
-	// for( const i of [ 6, 7, 8, 9, 10 ] ) {
-	// 	const [ nextdd, ncolours ] = follow_and_colour(
-	// 		nodes, links, faces, colours, a1, a1[i]
-	// 	);
-	// 	add_colours(colours, ncolours);
-	// 	dds.push(nextdd);
-	// }
+	// meridians = 45
 
-	// // will be weird
-	// for( const dd of dds.slice(2, 12) ) {
-	// 	const [ nextdd, ncolours ] = follow_and_colour(
-	// 		nodes, links, faces, colours, dd, dd[6]
-	// 	);
-	// 	add_colours(colours, ncolours);
-	// 	dds.push(nextdd);
-	// }
+	for( const a of dds.slice(1, 13) ) {
+		const [ nextdd, ncolours ] = follow_and_colour(
+			nodes, links, faces, colours, a, a[11]
+		);
+		const fp = dd_fingerprint(nextdd);
+		if( !(fp in seen) ) {
+			add_colours(colours, ncolours);
+			dds.push(nextdd);
+			seen[fp] = true;
+		}
+	}
 
-	// for( const dd of dds.slice(2, 7) ) {
-	// 	const [ nextdd, ncolours ] = follow_and_colour(
-	// 		nodes, links, faces, colours, dd, dd[6]
-	// 	);
-	// 	add_colours(colours, ncolours);
-	// 	dds.push(nextdd);
-	// }
+	// the 30 equatorials?
+	for( const a of dds.slice(13, 46) ) {
+		for( const i of [ 6, 7, 8, 9, 10 ] ) {
+			const [ nextdd, ncolours ] = follow_and_colour(
+				nodes, links, faces, colours, a, a[i]
+			);
+			const fp = dd_fingerprint(nextdd);
+			if( !(fp in seen) ) {
+				add_colours(colours, ncolours);
+				dds.push(nextdd);
+				seen[fp] = true;
+			}
+		}
+	}
+
+	for( const a of dds.slice(33, 76) ) {
+		for( const i of [ 6, 7, 8, 9, 10 ] ) {
+			const [ nextdd, ncolours ] = follow_and_colour(
+				nodes, links, faces, colours, a, a[i]
+			);
+			const fp = dd_fingerprint(nextdd);
+			if( !(fp in seen) ) {
+				add_colours(colours, ncolours);
+				dds.push(nextdd);
+				seen[fp] = true;
+			}
+		}
+	}
+
+	// this should get the rest or explode!
+	for( const a of dds ) {
+		for( const i of [ 6, 7, 8, 9, 10 ] ) {
+			const [ nextdd, ncolours ] = follow_and_colour(
+				nodes, links, faces, colours, a, a[i]
+			);
+			const fp = dd_fingerprint(nextdd);
+			if( !(fp in seen) ) {
+				add_colours(colours, ncolours);
+				dds.push(nextdd);
+				seen[fp] = true;
+			}
+		}
+	}
 
 
 	const labels = { 1: [], 2:[], 3:[], 4:[], 5:[] };
@@ -868,15 +901,12 @@ const nodes = make_120cell_vertices();
 const links = auto_detect_edges(nodes, 4);
 const faces = auto_120cell_faces(links);
 
-//const dodecas = make_120cell_cells(faces);
-
-//const colours = all_meridians(nodes, links, faces, faces[0], 341);
-
-//console.log(JSON.stringify(colours));
 
 
-// note - all_meridians colours 530 of the 600 vertices - try a simple
-// algorithm to see which of the remaining 70 have 4 neighbours labeled and
-// fill in the rest that way
+const a2 = arctic_two(nodes, links, faces, faces[0], 341)
 
-// have tried this and they mostly have 3 with some 1s and 2ss
+console.log(`got ${a2.dodecahedra.length}`);
+
+console.log(JSON.stringify(a2.labels));
+
+
