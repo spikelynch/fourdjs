@@ -323,51 +323,14 @@ function find_dodeca_next(faces, dodeca, f1, f2) {
 	return m[0];
 }
 
-// from any two mutual faces, return all the faces in their dodecahedron
 
-function make_dodecahedron(faces, f1, f2) {
+function faces_to_dodecahedron(faces, f1, f2, flip=false) {
 	const dodecahedron = [ f1, f2 ];
 
 	// take f1 as the 'center', get the other four around it from f2
 	const fs = find_dodeca_mutuals(faces, f1, f2);
-	const f3 = fs[0];
-	const f6 = fs[1];
-	dodecahedron.push(f3);
-	const f4 = find_dodeca_next(faces, dodecahedron, f1, f3);
-	dodecahedron.push(f4);
-	const f5 = find_dodeca_next(faces, dodecahedron, f1, f4);
-	dodecahedron.push(f5);
-	dodecahedron.push(f6);
-
-	// get the next ring
-
-	const f7 = find_dodeca_next(faces, dodecahedron, f6, f2);
-	dodecahedron.push(f7);
-	const f8 = find_dodeca_next(faces, dodecahedron, f2, f3);
-	dodecahedron.push(f8);
-	const f9 = find_dodeca_next(faces, dodecahedron, f3, f4);
-	dodecahedron.push(f9);
-	const f10 = find_dodeca_next(faces, dodecahedron, f4, f5);
-	dodecahedron.push(f10);
-	const f11 = find_dodeca_next(faces, dodecahedron, f5, f6);
-	dodecahedron.push(f11);
-
-	// get the last
-
-	const f12 = find_dodeca_next(faces, dodecahedron, f7, f8);
-	dodecahedron.push(f12);
-
-	return dodecahedron;
-}
-
-
-function faces_to_dodecahedron(faces, f1, f2) {
-	const dodecahedron = [ f1, f2 ];
-
-	// take f1 as the 'center', get the other four around it from f2
-	const fs = find_dodeca_mutuals(faces, f1, f2);
-	const f3 = fs[0];
-	const f6 = fs[1];
+	const f3 = flip ? fs[1] : fs[0];
+	const f6 = flip ? fs[0] : fs[1];
 	dodecahedron.push(f3);
 	const f4 = find_dodeca_next(faces, dodecahedron, f1, f3);
 	dodecahedron.push(f4);
@@ -397,11 +360,13 @@ function faces_to_dodecahedron(faces, f1, f2) {
 }
 
 // from a face and one neighbouring node, return a dodecahedron
+// Set 'flip' to true if we're coming to this dodecahedron from a
+// face on a previous one so that the chirality doesn't get inverted
 
-function face_plus_to_dodecahedron(faces, f1, node) {
+function face_plus_to_dodecahedron(faces, f1, node, flip=false) {
 	const neighbours = find_adjacent_faces(faces, f1);
 	const nodens = neighbours.filter((f) => f.nodes.includes(node));
-	return faces_to_dodecahedron(faces, f1, nodens[0]); // does it matter which?
+	return faces_to_dodecahedron(faces, f1, nodens[0], flip); // does it matter which?
 }
 
 
@@ -472,32 +437,342 @@ function dodecahedron_colours(vertices, p) {
 
 // p is the permutation of the first face
 
-function colour_one_dodecahedron(faces, face, node, p) {
-	const dd = face_plus_to_dodecahedron(faces, face, node);
+function colour_dodecahedron_from_face(dd, p) {
 	const vertices = dodecahedron_vertices(dd);
 	return dodecahedron_colours(vertices, p);
 }
 
+// from a dodecahedron and a face, get the adjoining dodecahedron
+
+function follow_face_to_dodeca(faces, startdd, nextf, flip=false) {
+	const neighbours = find_adjacent_faces(faces, nextf);
+	const nextnbors = neighbours.filter((f) => !startdd.includes(f));
+	return faces_to_dodecahedron(faces, nextf, nextnbors[0], flip);
+}
+
+
+function find_edges(links, nid) {
+	return links.filter((l) => l.source === nid || l.target === nid );
+}
+
+
+function find_adjacent_nodes(links, nid) {
+	return find_edges(links, nid).map((l) => {
+		if( l.source === nid ) {
+			return l.target;
+		} else {
+			return l.source;
+		}
+	});
+}
+
+function node_by_id(nodes, nid) {
+	const ns = nodes.filter((n) => n.id === nid);
+	return ns[0];
+}
+
+
+
+function find_adjacent_labels(nodes, links, nid) {
+	return find_adjacent_nodes(links, nid).map(
+		(nid) => node_by_id(nodes, nid).label 
+	);
+}
+
+
+
+function colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextdd) {
+	const lastvs = dodecahedron_vertices(dd);
+	const nextvs = dodecahedron_vertices(nextdd);
+	// get the initial colour permutations from the existing labels;
+	const p = [];
+	for( i = 0; i < 5; i ++ ) {
+		p[i] = colours[nextvs[i]];
+	}
+	const nlabels = colour_dodecahedron_from_face(nextdd, p);
+	// check if this is inconsistent with the original dd
+	const n = nextf.nodes[0];
+	const nbors = find_adjacent_nodes(links, n);
+	const nextns = nbors.filter((n) => !lastvs.includes(n));
+	const lastns = nbors.filter((n) => !nextvs.includes(n));
+	const lastcol = colours[lastns[0]];
+	const nextcol = nlabels[nextns[0]];
+	if( lastcol === nextcol ) {
+		// one node in the adjoining face has two same-coloured neighbours
+		// console.log('chirality mismatch');
+		// console.log(`   test node ${n}`);
+		// console.log(`   neighbours ${lastns[0]} ${nextns[0]}`);
+		return false;
+	}
+	return nlabels;
+}
+
+
+
+
+
+
+function meridian(nodes, links, faces, startf, startn, dir=11, max=10) {
+	const o =  face_plus_to_dodecahedron(faces, startf, startn);
+
+	const colours = colour_dodecahedron_from_face(o, [ 1, 2, 3, 4, 5 ] );
+
+	const dds = follow_meridian(nodes, links, faces, colours, o, dir, max);
+
+	const labels = { 1: [], 2:[], 3:[], 4:[], 5:[] };
+	for( const vstr in colours ) {
+		labels[colours[vstr]].push(Number(vstr));
+	}
+
+	return { dodecahedra: dds, labels: labels };
+
+}
+
+
+function all_meridians(nodes, links, faces, startf, startn) {
+	const o =  face_plus_to_dodecahedron(faces, startf, startn);
+
+	const colours = colour_dodecahedron_from_face(o, [ 1, 2, 3, 4, 5 ] );
+
+	// first meridian 
+	const dds = follow_meridian(nodes, links, faces, colours, o, 11, 10);
+	for ( const f of [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] ) {
+		follow_meridian(nodes, links, faces, colours, o, f, 4);
+	}
+
+	const labels = { 1: [], 2:[], 3:[], 4:[], 5:[] };
+	for( const vstr in colours ) {
+		labels[colours[vstr]].push(Number(vstr));
+	}
+
+	return labels;
+
+}
+
+
+
 
 // go along a meridian
+// modifies colours 
 
-function meridian(faces, startf, startn) {
-	const dds =  [ face_plus_to_dodecahedron(faces, startf, startn) ];
-
-	while( dds.length < 10 ) {
+function follow_meridian(nodes, links, faces, colours, odd, dir, max) {
+	let ncolours = {};
+	const dds = [ odd ];
+	while( ncolours && dds.length < max ) {
 		const dd = dds[dds.length - 1];
-		const nextf = dd[11]; // opposite to startf
-		const neighbours = find_adjacent_faces(faces, nextf);
-		const nextnbors = neighbours.filter((f) => !dd.includes(f));
+		const nextf = dds.length === 1 ? dd[dir] : dd[11]; 
 
-		const nextdd = faces_to_dodecahedron(faces, nextf, nextnbors[0]);
+		let nextdd = follow_face_to_dodeca(faces, dd, nextf);
+		ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextdd);
+
+		if( !ncolours ) {
+			nextdd = follow_face_to_dodeca(faces, dd, nextf, true);
+			ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, dd, nextf, nextdd);
+			if( !ncolours ) {
+				console.log("*** two mismatches");
+			}
+		}
+
+		for( const vertex in ncolours ) {
+			if( vertex in colours ) {
+				if( colours[vertex] !== ncolours[vertex] ) {
+					console.log(`*** label mismatch at ${vertex}: ${colours[vertex]}/${ncolours[vertex]}`);
+				}
+			} else {
+				colours[vertex] = ncolours[vertex];
+			}
+		}
+		dds.push(nextdd);
+	}
+	return dds;
+}
 
 
+function follow_and_colour(nodes, links, faces, colours, dd, face) {
+	let nextdd = follow_face_to_dodeca(faces, dd, face);
+	let ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, dd, face, nextdd);
+
+	if( !ncolours ) {
+		nextdd = follow_face_to_dodeca(faces, dd, face, true);
+		ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, dd, face, nextdd);
+		if( !ncolours ) {
+			console.log("two mismatches");
+		}
+	}
+	return [ nextdd, ncolours ];
+}
+
+
+function add_colours(colours, ncolours) {
+	for( const vertex in ncolours ) {
+		if( vertex in colours ) {
+			if( colours[vertex] !== ncolours[vertex] ) {
+				console.log(`label mismatch at ${vertex}: ${colours[vertex]}/${ncolours[vertex]}`);
+			}
+		} else {
+			colours[vertex] = ncolours[vertex];
+		}
+	}
+}
+
+
+// "arctic circle" - this one works
+
+function arctic(nodes, links, faces, startf, startn, max) {
+	console.log(startf);
+	const pole = face_plus_to_dodecahedron(faces, startf, startn);
+	const dds = [ pole ];
+	// colour first cell
+
+	const colours = colour_dodecahedron_from_face(dds[0], [ 1, 2, 3, 4, 5 ] );
+	const vs = dodecahedron_vertices(dds[0]);
+
+	let ncolours = {};
+
+	for( const face of pole ) {
+
+		let nextdd = follow_face_to_dodeca(faces, pole, face);
+		ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, pole, face, nextdd);
+
+		if( !ncolours ) {
+			nextdd = follow_face_to_dodeca(faces, pole, face, true);
+			ncolours = colour_next_dodeca_maybe(nodes, links, faces, colours, pole, face, nextdd);
+			if( !ncolours ) {
+				console.log("two mismatches");
+			}
+		}
+		for( const vertex in ncolours ) {
+			if( vertex in colours ) {
+				if( colours[vertex] !== ncolours[vertex] ) {
+					console.log(`label mismatch at ${vertex}: ${colours[vertex]}/${ncolours[vertex]}`);
+				}
+			} else {
+				colours[vertex] = ncolours[vertex];
+			}
+		}
 		dds.push(nextdd);
 	}
 
-	return dds;
 
+	const labels = { 1: [], 2:[], 3:[], 4:[], 5:[] };
+	for( const vstr in colours ) {
+		labels[colours[vstr]].push(Number(vstr));
+	}
+
+
+	return { dodecahedra: dds, labels: labels };
+
+
+
+}
+
+
+
+
+function arctic_two(nodes, links, faces, startf, startn) {
+	const pole = face_plus_to_dodecahedron(faces, startf, startn);
+	const dds = [ pole ];
+
+	const seen = {};
+	seen[dd_fingerprint(pole)] = true;
+
+	const colours = colour_dodecahedron_from_face(dds[0], [ 1, 2, 3, 4, 5 ] );
+	const vs = dodecahedron_vertices(dds[0]);
+
+	for( const face of pole ) {
+		const [ nextdd, ncolours ] = follow_and_colour(
+			nodes, links, faces, colours, pole, face
+		);
+		add_colours(colours, ncolours);
+		dds.push(nextdd);
+		seen[dd_fingerprint(nextdd)] = true;
+	}
+
+	// go around all of the arctic circle and grow all faces
+
+    // 1, 12, 20, 12, 30 = 75
+    // 0  1   13, 33, 45
+
+	for( const a of dds.slice(1, 13) ) {
+		for( const i of [ 6, 7, 8, 9, 10 ] ) {
+			const [ nextdd, ncolours ] = follow_and_colour(
+				nodes, links, faces, colours, a, a[i]
+			);
+			const fp = dd_fingerprint(nextdd);
+			if( !(fp in seen) ) {
+				add_colours(colours, ncolours);
+				dds.push(nextdd);
+				seen[fp] = true;
+			}
+		}
+	}
+
+	// meridians = 45
+
+	for( const a of dds.slice(1, 13) ) {
+		const [ nextdd, ncolours ] = follow_and_colour(
+			nodes, links, faces, colours, a, a[11]
+		);
+		const fp = dd_fingerprint(nextdd);
+		if( !(fp in seen) ) {
+			add_colours(colours, ncolours);
+			dds.push(nextdd);
+			seen[fp] = true;
+		}
+	}
+
+	// the 30 equatorials?
+	for( const a of dds.slice(13, 46) ) {
+		for( const i of [ 6, 7, 8, 9, 10 ] ) {
+			const [ nextdd, ncolours ] = follow_and_colour(
+				nodes, links, faces, colours, a, a[i]
+			);
+			const fp = dd_fingerprint(nextdd);
+			if( !(fp in seen) ) {
+				add_colours(colours, ncolours);
+				dds.push(nextdd);
+				seen[fp] = true;
+			}
+		}
+	}
+
+	for( const a of dds.slice(33, 76) ) {
+		for( const i of [ 6, 7, 8, 9, 10 ] ) {
+			const [ nextdd, ncolours ] = follow_and_colour(
+				nodes, links, faces, colours, a, a[i]
+			);
+			const fp = dd_fingerprint(nextdd);
+			if( !(fp in seen) ) {
+				add_colours(colours, ncolours);
+				dds.push(nextdd);
+				seen[fp] = true;
+			}
+		}
+	}
+
+	// this should get the rest or explode!
+	for( const a of dds ) {
+		for( const i of [ 6, 7, 8, 9, 10 ] ) {
+			const [ nextdd, ncolours ] = follow_and_colour(
+				nodes, links, faces, colours, a, a[i]
+			);
+			const fp = dd_fingerprint(nextdd);
+			if( !(fp in seen) ) {
+				add_colours(colours, ncolours);
+				dds.push(nextdd);
+				seen[fp] = true;
+			}
+		}
+	}
+
+
+	const labels = { 1: [], 2:[], 3:[], 4:[], 5:[] };
+	for( const vstr in colours ) {
+		labels[colours[vstr]].push(Number(vstr));
+	}
+
+
+	return { dodecahedra: dds, labels: labels };
 }
 
 
@@ -527,7 +802,7 @@ function face_to_dodecahedra(faces, f) {
 
 function dd_fingerprint(dodecahedron) {
 	const ids = dodecahedron.map((face) => face.id);
-	ids.sort()
+	ids.sort((a, b) => a - b);
 	return ids.join(',');
 }
 
@@ -556,6 +831,28 @@ function make_120cell_cells(faces) {
 }
 
 
+
+function dodeca_travers(nodes, links, n, fn) {
+	const queue = [];
+	const seen = {};
+	const nodes_id = {};
+
+	queue.push(n.id);
+
+	while( queue.length > 0 ) {
+		const v = queue.shift();
+		find_adjacent(links, v).map((aid) => {
+			if( !(aid in seen) ) {
+				seen[aid] = true;
+				queue.push(aid);
+				fn(nodes_id[aid]);
+			}
+		})
+	}
+}
+
+
+
 const cell120 = () => {
 	const nodes  = make_120cell_vertices();
 	const links = auto_detect_edges(nodes, 4);
@@ -582,9 +879,34 @@ function dodeca_nodes(dd) {
 }
 
 
+function label_nodes(nodes, ids, label) {
+	nodes.filter((n) => ids.includes(n.id)).map((n) => n.label = label);
+}
+
+function meridian_label_120cell(nodes) {
+
+		const MERIDIAN_COLOURED ={"1":[27,38,49,61,68,74,87,105,120,126,131,140,149,156,165,174,179,185,200,207,210,218,223,226,231,234,239,241,253,258,263,265,272,274,279,284,285,289,296,300,301,306,311,313,320,324,325,331,334,339,342,347,350,356,357,367,369,376,378,383,388,389,393,400,413,414,419,420,425,440,449,453,458,460,469,471,473,474,487,488,490,494,499,503,511,512,513,514,525,527,530,532,539,543,546,550,555,558,563,566,572,573,580,581,592,593],"2":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,21,22,23,24,25,28,30,31,34,35,37,40,41,46,47,50,51,53,56,57,60,62,63,66,67,69,72,73,76,78,83,85,88,90,93,97,103,106,107,109,112,113,116,118,119,122,123,125,129,132,134,135,138,139,141,144,145,148,150,151,155,157,160,161,164,166,167,170,171,173,177,180,182,183,187,189,192,193,196,198,202,203,205,208,209,212,214,215],"3":[26,39,45,52,64,65,94,99,108,117,127,130,137,152,153,168,175,178,188,197,206,211,219,222,227,230,235,238,245,251,268,269,273,280,283,286,292,293,299,302,305,312,316,317,321,328,330,335,349,355,358,363,366,370,375,377,384,385,392,394,399,404,405,415,416,417,418,426,437,439,441,445,452,456,457,459,470,472,475,485,486,491,495,498,502,509,510,515,516,526,529,531,538,542,547,551,554,559,562,567,569,576,577,584,588,597],"4":[32,33,43,54,58,71,77,84,101,110,115,121,136,143,146,159,162,169,184,204,213,220,221,228,229,236,237,249,260,261,271,276,277,281,288,290,295,297,304,308,309,315,318,322,327,329,336,340,341,351,354,359,361,368,371,374,379,382,387,390,396,397,409,410,423,424,430,433,435,443,447,450,454,461,463,466,468,477,478,483,484,489,493,500,504,507,508,517,518,522,533,535,540,544,545,549,553,560,561,568,570,583,587,590,595,598],"5":[29,36,42,55,59,70,80,81,89,111,114,133,142,147,163,181,191,194,201,216,217,224,225,232,233,240,243,246,255,267,270,275,278,282,287,291,294,298,303,307,310,314,319,323,326,332,333,337,344,345,352,353,360,364,365,372,373,380,381,395,398,402,407,411,412,421,422,429,436,442,446,451,455,462,464,465,467,479,481,482,492,496,497,501,505,506,519,520,521,523,534,536,537,541,548,552,556,557,564,565,574,579,586,591,594,599]};
+
+
+		for( const cstr in MERIDIAN_COLOURED ) {
+			label_nodes(nodes, MERIDIAN_COLOURED[cstr], Number(cstr));
+		}
+
+		//label_nodes(nodes, [313], 6);
+}
+
+
 
 const nodes = make_120cell_vertices();
 const links = auto_detect_edges(nodes, 4);
 const faces = auto_120cell_faces(links);
-//const dodecas = make_120cell_cells(faces);
+
+
+
+const a2 = arctic_two(nodes, links, faces, faces[0], 341)
+
+console.log(`got ${a2.dodecahedra.length}`);
+
+console.log(JSON.stringify(a2.labels));
+
 
