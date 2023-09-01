@@ -35,7 +35,6 @@ scene.background = new THREE.Color(0x808080);
 const material = new THREE.MeshStandardMaterial({ color: 0x3293a9 });
 const node_colours = get_colours(0x3293a9);
 
-console.log(node_colours);
 
 material.transparent = true;
 material.opacity = 0.5;
@@ -75,7 +74,6 @@ function createShape(name) {
 	if( shape ) {
 		scene.remove(shape);
 	}
-	console.log(STRUCTURES[name]);
 	shape = new FourDShape(node_ms, link_ms, face_ms, STRUCTURES[name]);
 	scene.add(shape);
 }

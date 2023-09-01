@@ -62,11 +62,11 @@ export const cell5 = () => {
 	const r2 = Math.sqrt(2) / 2;
 	return {
 		nodes: [
-	      {id:1, label: 0, x: r2, y: r2, z: r2, w: -r2 / r5 },
-	      {id:2, label: 1, x: r2, y: -r2, z: -r2, w: -r2 / r5 },
-	      {id:3, label: 2, x: -r2, y: r2, z: -r2, w: -r2 / r5 },
-	      {id:4, label: 3, x: -r2, y: -r2, z: r2, w: -r2 / r5 },
-	      {id:5, label: 4, x: 0, y: 0, z: 0, w: 4 * r2 / r5 },
+	      {id:1, label: 1, x: r2, y: r2, z: r2, w: -r2 / r5 },
+	      {id:2, label: 2, x: r2, y: -r2, z: -r2, w: -r2 / r5 },
+	      {id:3, label: 3, x: -r2, y: r2, z: -r2, w: -r2 / r5 },
+	      {id:4, label: 4, x: -r2, y: -r2, z: r2, w: -r2 / r5 },
+	      {id:5, label: 5, x: 0, y: 0, z: 0, w: 4 * r2 / r5 },
 		],
 		links: [
 			{ id:1, source:1, target: 2},
@@ -92,14 +92,14 @@ export const cell16 = () => {
 	let nodes = PERMUTE.coordinates([1, 1, 1, 1],  0);
 	nodes = nodes.filter((n) => n.x * n.y * n.z * n.w > 0);
 
-	nodes[0].label = 0;
-	nodes[3].label = 1;
-	nodes[5].label = 2;
-	nodes[6].label = 3;
-	nodes[7].label = 0;
-	nodes[4].label = 1;
-	nodes[2].label = 2;
-	nodes[1].label = 3;
+	nodes[0].label = 1;
+	nodes[3].label = 2;
+	nodes[5].label = 3;
+	nodes[6].label = 4;
+	nodes[7].label = 1;
+	nodes[4].label = 2;
+	nodes[2].label = 3;
+	nodes[1].label = 4;
 
 	index_nodes(nodes);
 	scale_nodes(nodes, 0.75);
@@ -123,6 +123,8 @@ export const tesseract = () => {
 
 	for( const n of nodes ) {
 		if( n.x * n.y * n.z * n.w > 0 ) {
+			n.label = 2;
+		} else {
 			n.label = 1;
 		}
 	}
@@ -143,9 +145,9 @@ export const tesseract = () => {
 
 
 const CELL24_INDEXING = {
-	x: { y: 0, z: 2, w: 1 },
-	y: { z: 1, w: 2 },
-	z: { w: 0 } 
+	x: { y: 1, z: 3, w: 2 },
+	y: { z: 2, w: 3 },
+	z: { w: 1 } 
 };
 
 
