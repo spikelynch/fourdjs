@@ -4,7 +4,7 @@ import * as THREE from 'three';
 
 import * as POLYTOPES from './polytopes.js';
 import { rotfn } from './rotation.js';
-import { FourDGUI } from './gui.js';
+import { FourDGUI, DEFAULTS } from './gui.js';
 import { FourDShape } from './fourDShape.js';
 import { get_colours } from './colours.js';
 
@@ -31,9 +31,9 @@ document.body.appendChild( renderer.domElement );
 
 // set up colours and materials for gui callbacks
 
-scene.background = new THREE.Color(0x808080);
-const material = new THREE.MeshStandardMaterial({ color: 0x3293a9 });
-const node_colours = get_colours(0x3293a9);
+scene.background = new THREE.Color(DEFAULTS.background);
+const material = new THREE.MeshStandardMaterial({ color: DEFAULTS.color });
+const node_colours = get_colours(DEFAULTS.color);
 
 
 material.transparent = true;
@@ -41,13 +41,13 @@ material.opacity = 0.5;
 
 
 const node_ms = node_colours.map((c) => new THREE.MeshStandardMaterial({color: c}));
+const link_ms = node_colours.map((c) => new THREE.MeshStandardMaterial({color: c}));
 
-node_ms[0].transparent = true;
-node_ms[0].opacity = 0.0;
-
-
-const link_ms = [ material ];
-
+link_ms.map((m) => {
+	m.transparent =  true;
+	m.opacity = 0.5;
+	}
+)
 
 const face_ms = [
 	new THREE.MeshLambertMaterial( { color: 0x44ff44 } )
@@ -65,6 +65,7 @@ const STRUCTURES = {
 	'tesseract': POLYTOPES.tesseract(),
 	'24-cell': POLYTOPES.cell24(),
 	'120-cell': POLYTOPES.cell120(),
+	'120-cell-inscribed': POLYTOPES.cell120_inscribed(),
 	'600-cell': POLYTOPES.cell600()
 };
 
@@ -87,6 +88,7 @@ function setColors(c) {
 	const nc = get_colours(c);
 	for( let i = 0; i < node_ms.length; i++ ) {
 		node_ms[i].color = new THREE.Color(nc[i]);
+		link_ms[i].color = new THREE.Color(nc[i]);
 	}
 	material.color = new THREE.Color(c);
 }
@@ -95,8 +97,13 @@ function setBackground(c) {
 	scene.background = new THREE.Color(c)
 }
 
+function setLinkOpacity(o) {
+	for( const lm of link_ms ) {
+		lm.opacity = o;
+	}	
+}
 
-const gui = new FourDGUI(createShape, setColors, setBackground);
+const gui = new FourDGUI(createShape, setColors, setBackground, setLinkOpacity);
 
 // these are here to pick up colour settings from the URL params
 setColors(gui.params.color);
@@ -159,7 +166,7 @@ function animate() {
 	];
 	shape.hyperplane = gui.params.hyperplane;
 	shape.link_scale = gui.params.thickness;
-	shape.node_scale = gui.params.thickness * (gui.params.nodesize + 1);
+	shape.node_scale = gui.params.nodesize;
 	shape.render3(rotations);
 
 	renderer.render( scene, camera );

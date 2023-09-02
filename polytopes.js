@@ -320,18 +320,6 @@ function basic_auto_label_120cell(nodes, links) {
 		}
 	}
 
-// 	label_faces_120cell(nodes, faces, [
-//     1,   2,   4, 169, 626,
-//   145, 149, 553, 173, 171,
-//   147, 554
-// ], 2);
-
-// 	label_faces_120cell(nodes, faces, [
-//     1,   5,   3, 193, 641,
-//   217, 221, 565, 197, 195,
-//   219, 566
-// ], 3);
-
 }
 
 function label_120cell(nodes) {
@@ -367,6 +355,34 @@ export const cell120 = () => {
 		},
 	}
 }
+
+
+export const cell120_inscribed = () => {
+	const nodes  = make_120cell_vertices();
+	const links = auto_detect_edges(nodes, 4);
+
+	label_120cell(nodes);
+
+	const all_links = links;
+	all_links.map((l) => l.label = 0);
+
+	for( const p of [ 5 ]) {
+		const nodes600 = nodes.filter((n) => n.label === p);
+		const links600 = auto_detect_edges(nodes600, 12);
+		links600.map((l) => l.label = p);
+		all_links.push(...links600);
+	}
+
+	return {
+		nodes: nodes,
+		links: all_links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		},
+	}
+}
+
 
 // Schoute's partition via https://arxiv.org/abs/1010.4353
 

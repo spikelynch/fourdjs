@@ -896,17 +896,36 @@ function meridian_label_120cell(nodes) {
 }
 
 
+function check_120cell_nodes(nodes) {
+	nodes.map((n) => {
+		const vs = find_adjacent_labels(nodes, links, n.id);
+		vs.push(n.label);
+		console.log(`Node ${n.id} and neighbours ${vs}`);
+		const fp = vs.sort().join(',');
+		if( fp !== "1,2,3,4,5" ) {
+			console.log(`Label error ${n.id} ${fp}`)
+		}
+	});
+}
+ 
 
 const nodes = make_120cell_vertices();
 const links = auto_detect_edges(nodes, 4);
 const faces = auto_120cell_faces(links);
 
 
+console.log("Calculating 120-cell colours")
 
 const a2 = arctic_two(nodes, links, faces, faces[0], 341)
 
 console.log(`got ${a2.dodecahedra.length}`);
 
-console.log(JSON.stringify(a2.labels));
+const labels = a2.labels;
+
+console.log("labelling nodes");
+for( const cstr in labels ) {
+	label_nodes(nodes, labels[cstr], Number(cstr));
+}
+
 
 

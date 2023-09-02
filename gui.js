@@ -1,41 +1,53 @@
 import { GUI } from 'lil-gui';
 
 
-const DEFAULT_SHAPE = '120-cell';
-const DEFAULT_COLOR = 0x3293a9;
-const DEFAULT_BG = 0x808080;
+
+const DEFAULTS = {
+	thickness: 0.25,
+	nodesize: 1.25,
+	linkopacity: 0.5,
+	shape: '120-cell',
+	color: 0x3293a9,
+	background: 0xd4d4d4,
+	hyperplane: 2,
+	xRotate: 'YW',
+	yRotate: 'XZ',
+	dtheta: 0,
+	dpsi: 0,
+}
 
 
 
 class FourDGUI {
 
-	constructor(createShape, setColor, setBackground) {
+	constructor(createShape, setColor, setBackground, setLinkOpacity) {
 		this.gui = new GUI();
 		this.parseLinkParams();
 		const guiObj = this;
-		console.log(this.link);
 		this.params = {
-			shape: this.link['shape'] || DEFAULT_SHAPE,
-			thickness: this.link['thickness'] || 1,
-			nodesize: this.link['nodesize'] || 2,
-			color: this.link['color'] || DEFAULT_COLOR,
-			background: this.link['background'] || DEFAULT_BG,
-			hyperplane: this.link['hyperplane'] || 2,
-			xRotate: this.link['xRotate'] || 'YW',
-			yRotate: this.link['yRotate'] || 'XZ',
+			shape: this.link['shape'],
+			thickness: this.link['thickness'],
+			linkopacity: this.link['linkopacity'],
+			nodesize: this.link['nodesize'],
+			color: this.link['color'],
+			background: this.link['background'],
+			hyperplane: this.link['hyperplane'],
+			xRotate: this.link['xRotate'],
+			yRotate: this.link['yRotate'],
 			damping: false,
-			dtheta: this.link['dtheta'] || 0,
-			dpsi: this.link['dpsi'] || 0,
+			dtheta: this.link['dtheta'],
+			dpsi: this.link['dpsi'],
 			"copy link": function () { guiObj.copyUrl() }
 		};
 
 		this.gui.add(this.params, 'shape',
-			[ '5-cell', '16-cell', 'tesseract', '24-cell', '600-cell', '120-cell' ]
+			[ '5-cell', '16-cell', 'tesseract', '24-cell', '600-cell', '120-cell', '120-cell-inscribed' ]
 		).onChange(createShape)
 
-		this.gui.add(this.params, 'hyperplane', 1.5, 3);
-		this.gui.add(this.params, 'thickness', 0.1, 4);
-		this.gui.add(this.params, 'nodesize', 0, 5);
+		this.gui.add(this.params, 'hyperplane', 1.5, 2.25);
+		this.gui.add(this.params, 'thickness', 0.1, 2);
+		this.gui.add(this.params, 'linkopacity', 0, 1).onChange(setLinkOpacity);
+		this.gui.add(this.params, 'nodesize', 0.1, 4);
 		this.gui.addColor(this.params, 'color').onChange(setColor);
 		this.gui.addColor(this.params, 'background').onChange(setBackground);
 		this.gui.add(this.params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
@@ -46,7 +58,7 @@ class FourDGUI {
 	}	
 
 
-	numParam(param, parser, dft) {
+	numParam(param, parser) {
 		const value = this.urlParams.get(param);
 		if( value ) {
 			const n = parser(value);
@@ -54,7 +66,7 @@ class FourDGUI {
 				return n;
 			}
 		}
-		return dft;
+		return DEFAULTS[param];
 	}
 
 	stringToHex(cstr) {
@@ -76,21 +88,19 @@ class FourDGUI {
 			const value = this.urlParams.get(param);
 			if( value ) {
 				this.link[param] = value;
+			} else {
+				this.link[param] = DEFAULTS[param];
 			}
 		}
 		const guiObj = this;
-		this.link['hyperplane'] = this.numParam('hyperplane', parseFloat, 2);
-		this.link['thickness'] = this.numParam('thickness', parseFloat, 1);
-		this.link['nodesize'] = this.numParam('nodesize', parseFloat, 1);
-		this.link['color'] = this.numParam(
-			'color', (s) => guiObj.stringToHex(s), DEFAULT_COLOR
-			);
-		this.link['background'] = this.numParam(
-			'background', (s) => guiObj.stringToHex(s), DEFAULT_BG
-			);
-
-		this.link['dpsi'] = this.numParam('dpsi', parseFloat, 0);
-		this.link['dtheta'] = this.numParam('dtheta', parseFloat, 0);
+		this.link['hyperplane'] = this.numParam('hyperplane', parseFloat);
+		this.link['thickness'] = this.numParam('thickness', parseFloat);
+		this.link['linkopacity'] = this.numParam('linkopacity', parseFloat);
+		this.link['nodesize'] = this.numParam('nodesize', parseFloat);
+		this.link['color'] = this.numParam('color', (s) => guiObj.stringToHex(s));
+		this.link['background'] = this.numParam('background', (s) => guiObj.stringToHex(s));
+		this.link['dpsi'] = this.numParam('dpsi', parseFloat);
+		this.link['dtheta'] = this.numParam('dtheta', parseFloat);
 	}
 
 
@@ -151,4 +161,4 @@ class FourDGUI {
 }
 
 
-export { FourDGUI };
+export { FourDGUI, DEFAULTS };
