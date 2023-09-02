@@ -3,7 +3,7 @@ import * as THREE from 'three';
 
 
 import * as POLYTOPES from './polytopes.js';
-import { rotfn } from './rotation.js';
+import { get_rotation } from './rotation.js';
 import { FourDGUI, DEFAULTS } from './gui.js';
 import { FourDShape } from './fourDShape.js';
 import { get_colours } from './colours.js';
@@ -160,10 +160,8 @@ function animate() {
 		}
 	}
 
-	const rotations = [
-		rotfn[gui.params.xRotate](theta), 
-		rotfn[gui.params.yRotate](psi)
-	];
+	const rotations = get_rotation(gui.params.rotation, theta, psi);
+
 	shape.hyperplane = gui.params.hyperplane;
 	shape.link_scale = gui.params.thickness;
 	shape.node_scale = gui.params.nodesize;

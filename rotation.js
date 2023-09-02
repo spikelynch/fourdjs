@@ -81,5 +81,24 @@ export const rotfn = {
 	ZW: rotZW,
 };
 
+const rotMode = {
+	'rigid': [ rotYW, rotXW ],
+	'tumbling': [ rotYW, rotXZ  ],
+	'inside-out': [ rotYW, rotXY ],
+	'axisymmetrical': [ rotZW, rotXY ]
+};
+
+
+export const get_rotation = (mode, theta, psi) => {
+	const fns = rotMode[mode];
+	return [ fns[0](theta), fns[1](psi) ];
+}
+
+
+
+	// [
+	// 	rotfn[gui.params.xRotate](theta), 
+	// 	rotfn[gui.params.yRotate](psi)
+	// ];
 
 

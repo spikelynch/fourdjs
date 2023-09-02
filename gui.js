@@ -10,8 +10,7 @@ const DEFAULTS = {
 	color: 0x3293a9,
 	background: 0xd4d4d4,
 	hyperplane: 2,
-	xRotate: 'YW',
-	yRotate: 'XZ',
+	rotation: 'rigid',
 	dtheta: 0,
 	dpsi: 0,
 }
@@ -32,8 +31,7 @@ class FourDGUI {
 			color: this.link['color'],
 			background: this.link['background'],
 			hyperplane: this.link['hyperplane'],
-			xRotate: this.link['xRotate'],
-			yRotate: this.link['yRotate'],
+			rotation: this.link['rotation'],
 			damping: false,
 			dtheta: this.link['dtheta'],
 			dpsi: this.link['dpsi'],
@@ -50,8 +48,7 @@ class FourDGUI {
 		this.gui.add(this.params, 'nodesize', 0.1, 4);
 		this.gui.addColor(this.params, 'color').onChange(setColor);
 		this.gui.addColor(this.params, 'background').onChange(setBackground);
-		this.gui.add(this.params, 'xRotate', [ 'YW', 'YZ', 'ZW' ]);
-		this.gui.add(this.params, 'yRotate', [ 'XZ', 'XY', 'XW' ]);
+		this.gui.add(this.params, 'rotation', [ 'rigid', 'tumbling', 'inside-out', 'axisymmetrical' ]);
 		this.gui.add(this.params, 'damping');
 		this.gui.add(this.params, 'copy link');
 
@@ -84,7 +81,7 @@ class FourDGUI {
 		this.link = {};
 
 		this.urlParams = this.linkUrl.searchParams;
-		for( const param of [ "shape", "xRotate", "yRotate" ]) {
+		for( const param of [ "shape", "rotation" ]) {
 			const value = this.urlParams.get(param);
 			if( value ) {
 				this.link[param] = value;
@@ -112,8 +109,7 @@ class FourDGUI {
 		url.searchParams.append("color", this.hexToString(this.params.color));
 		url.searchParams.append("background", this.hexToString(this.params.background));
 		url.searchParams.append("hyperplane", this.params.hyperplane.toString());
-		url.searchParams.append("xRotate", this.params.xRotate);
-		url.searchParams.append("yRotate", this.params.yRotate);
+		url.searchParams.append("rotation", this.params.rotation);
 		url.searchParams.append("dtheta", this.params.dtheta.toString());
 		url.searchParams.append("dpsi", this.params.dpsi.toString());
 		this.copyTextToClipboard(url);
