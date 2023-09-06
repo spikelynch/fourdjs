@@ -65,17 +65,39 @@ const STRUCTURES = {
 	'tesseract': POLYTOPES.tesseract(),
 	'24-cell': POLYTOPES.cell24(),
 	'120-cell': POLYTOPES.cell120(),
-	'120-cell-inscribed': POLYTOPES.cell120_inscribed(),
-	'600-cell': POLYTOPES.cell600()
+	'120-cell-all-inscribed': POLYTOPES.cell120_all_inscribed(),
+	'600-cell': POLYTOPES.cell600(),
+	'600-cell-all-inscribed': POLYTOPES.cell600_all_inscribed(),
 };
+
+const INSCRIBED = {
+	'120-cell': POLYTOPES.cell120_inscribed(),
+	'600-cell': POLYTOPES.cell600_inscribed(),
+};
+
+const ALL_INSCRIBED = {
+	'120-cell': POLYTOPES.cell120_all_inscribed(),
+	'600-cell': POLYTOPES.cell600_all_inscribed(),
+}
 
 let shape = false;
 
-function createShape(name) {
+function createShape(name, inscribed, all) {
 	if( shape ) {
 		scene.remove(shape);
 	}
-	shape = new FourDShape(node_ms, link_ms, face_ms, STRUCTURES[name]);
+	let structure = STRUCTURES[name];
+	if( inscribed ) {
+		if( name in INSCRIBED ) {
+			if( all ) {
+				structure = ALL_INSCRIBED[name];
+			} else {
+				structure = INSCRIBED[name];
+			}
+		} 
+	}
+
+	shape = new FourDShape(node_ms, link_ms, face_ms, structure);
 	scene.add(shape);
 }
 
@@ -97,13 +119,24 @@ function setBackground(c) {
 	scene.background = new THREE.Color(c)
 }
 
-function setLinkOpacity(o) {
-	for( const lm of link_ms ) {
-		lm.opacity = o;
-	}	
+function setLinkOpacity(o, primary) {
+	if( primary ) {
+		link_ms[0].opacity = o;
+	} else {
+		for( const lm of link_ms.slice(1) ) {
+			lm.opacity = o;
+		}
+	}
 }
 
-const gui = new FourDGUI(createShape, setColors, setBackground, setLinkOpacity);
+let gui; // 
+
+function changeShape() {
+	console.log("change shape!")
+	createShape(gui.params.shape, gui.params.inscribed, gui.params.inscribe_all);
+}
+
+gui = new FourDGUI(changeShape, setColors, setBackground, setLinkOpacity);
 
 // these are here to pick up colour settings from the URL params
 setColors(gui.params.color);
@@ -146,7 +179,7 @@ renderer.domElement.addEventListener("pointerup", (event) => {
 	dragging = false;
 })
 
-createShape(gui.params.shape);
+createShape(gui.params.shape, gui.params.inscribed, gui.params.inscribe_all);
 
 function animate() {
 	requestAnimationFrame( animate );

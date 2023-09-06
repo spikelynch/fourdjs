@@ -6,7 +6,10 @@ const DEFAULTS = {
 	thickness: 0.25,
 	nodesize: 1.25,
 	linkopacity: 0.5,
+	link2opacity: 0.5,
 	shape: '120-cell',
+	inscribed: false,
+	inscribe_all: false,
 	color: 0x3293a9,
 	background: 0xd4d4d4,
 	hyperplane: 2,
@@ -19,14 +22,17 @@ const DEFAULTS = {
 
 class FourDGUI {
 
-	constructor(createShape, setColor, setBackground, setLinkOpacity) {
+	constructor(changeShape, setColor, setBackground, setLinkOpacity) {
 		this.gui = new GUI();
 		this.parseLinkParams();
 		const guiObj = this;
 		this.params = {
 			shape: this.link['shape'],
+			inscribed: this.link['inscribed'],
+			inscribe_all: this.link['inscribe_all'],
 			thickness: this.link['thickness'],
 			linkopacity: this.link['linkopacity'],
+			link2opacity: this.link['linkopacity'],
 			nodesize: this.link['nodesize'],
 			color: this.link['color'],
 			background: this.link['background'],
@@ -39,12 +45,19 @@ class FourDGUI {
 		};
 
 		this.gui.add(this.params, 'shape',
-			[ '5-cell', '16-cell', 'tesseract', '24-cell', '600-cell', '120-cell', '120-cell-inscribed' ]
-		).onChange(createShape)
-
+			[ '5-cell', '16-cell', 'tesseract',
+				'24-cell', '600-cell', '120-cell' ]
+		).onChange(changeShape)
+		this.gui.add(this.params, 'inscribed').onChange(changeShape);
+		this.gui.add(this.params, 'inscribe_all').onChange(changeShape);
 		this.gui.add(this.params, 'hyperplane', 1.5, 2.25);
 		this.gui.add(this.params, 'thickness', 0.1, 2);
-		this.gui.add(this.params, 'linkopacity', 0, 1).onChange(setLinkOpacity);
+		this.gui.add(this.params, 'linkopacity', 0, 1).onChange(
+			(v) => setLinkOpacity(v, true)
+		);
+		this.gui.add(this.params, 'link2opacity', 0, 1).onChange(
+			(v) => setLinkOpacity(v, false)
+		);
 		this.gui.add(this.params, 'nodesize', 0.1, 4);
 		this.gui.addColor(this.params, 'color').onChange(setColor);
 		this.gui.addColor(this.params, 'background').onChange(setBackground);
@@ -79,6 +92,7 @@ class FourDGUI {
 	parseLinkParams() {
 		this.linkUrl = new URL(window.location.toLocaleString());
 		this.link = {};
+		const guiObj = this;
 
 		this.urlParams = this.linkUrl.searchParams;
 		for( const param of [ "shape", "rotation" ]) {
@@ -89,10 +103,13 @@ class FourDGUI {
 				this.link[param] = DEFAULTS[param];
 			}
 		}
-		const guiObj = this;
+		for( const param of [ "inscribed", "inscribe_all"] ) {
+			this.link[param] = ( this.urlParams.get(param) === 'y' );
+		}
 		this.link['hyperplane'] = this.numParam('hyperplane', parseFloat);
 		this.link['thickness'] = this.numParam('thickness', parseFloat);
 		this.link['linkopacity'] = this.numParam('linkopacity', parseFloat);
+		this.link['link2opacity'] = this.numParam('link2opacity', parseFloat);
 		this.link['nodesize'] = this.numParam('nodesize', parseFloat);
 		this.link['color'] = this.numParam('color', (s) => guiObj.stringToHex(s));
 		this.link['background'] = this.numParam('background', (s) => guiObj.stringToHex(s));
@@ -104,8 +121,12 @@ class FourDGUI {
 	copyUrl() {
 		const url = new URL(this.linkUrl.origin + this.linkUrl.pathname);
 		url.searchParams.append("shape", this.params.shape);
+		url.searchParams.append("inscribed", this.params.inscribed ? 'y': 'n');
+		url.searchParams.append("inscribe_all", this.params.inscribe_all ? 'y': 'n');
 		url.searchParams.append("thickness", this.params.thickness.toString());
 		url.searchParams.append("nodesize", this.params.nodesize.toString());
+		url.searchParams.append("linkopacity", this.params.thickness.toString());
+		url.searchParams.append("link2opacity", this.params.nodesize.toString());
 		url.searchParams.append("color", this.hexToString(this.params.color));
 		url.searchParams.append("background", this.hexToString(this.params.background));
 		url.searchParams.append("hyperplane", this.params.hyperplane.toString());

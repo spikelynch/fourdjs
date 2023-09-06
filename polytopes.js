@@ -151,6 +151,11 @@ const CELL24_INDEXING = {
 };
 
 
+function node_by_id(nodes, nid) {
+	const ns = nodes.filter((n) => n.id === nid);
+	return ns[0];
+}
+
 
 export const cell24 = () => {
 	const nodes = PERMUTE.coordinates([0, 0, 1, 1], 0);
@@ -162,6 +167,15 @@ export const cell24 = () => {
 
 	index_nodes(nodes);
 	const links = auto_detect_edges(nodes, 8);
+
+	links.map((l) => {
+		const ls = [ l.source, l.target ].map((nid) => node_by_id(nodes, nid).label);
+		for ( const c of [1, 2, 3] ) {
+			if( ! ls.includes(c) ) {
+				l.label = c
+			}
+		}
+	});
 
 	return {
 		nodes: nodes,
@@ -357,7 +371,7 @@ export const cell120 = () => {
 }
 
 
-export const cell120_inscribed = () => {
+const cell120_some_inscribed = (ps) => {
 	const nodes  = make_120cell_vertices();
 	const links = auto_detect_edges(nodes, 4);
 
@@ -366,7 +380,7 @@ export const cell120_inscribed = () => {
 	const all_links = links;
 	all_links.map((l) => l.label = 0);
 
-	for( const p of [ 5 ]) {
+	for( const p of ps) {
 		const nodes600 = nodes.filter((n) => n.label === p);
 		const links600 = auto_detect_edges(nodes600, 12);
 		links600.map((l) => l.label = p);
@@ -382,6 +396,9 @@ export const cell120_inscribed = () => {
 		},
 	}
 }
+
+export const cell120_inscribed = () => cell120_some_inscribed([5]);
+export const cell120_all_inscribed = () => cell120_some_inscribed([1,2,3,4,5]);
 
 
 // Schoute's partition via https://arxiv.org/abs/1010.4353
@@ -518,7 +535,7 @@ function make_600cell_vertices() {
 	].flat();
 
 	for( const n of nodes ) {
-		n.label = label_vertex(n, coords, partition600) - 1;
+		n.label = label_vertex(n, coords, partition600);
 	}
 
 	for( const n of nodes ) {
@@ -569,4 +586,43 @@ export const cell600 = () => {
 	}
 }
 
+
+
+const cell600_some_inscribed = (ps) => {
+	const nodes  = make_600cell_vertices();
+	const links = auto_detect_edges(nodes, 12);
+
+	const all_links = links;
+	all_links.map((l) => l.label = 0);
+
+	for( const p of ps) {
+		const nodes24 = nodes.filter((n) => n.label === p);
+		const links24 = auto_detect_edges(nodes24, 8);
+		links24.map((l) => l.label = p);
+		all_links.push(...links24);
+	}
+
+	return {
+		nodes: nodes,
+		links: all_links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		},
+	}
+
+
+	return {
+		nodes: nodes,
+		links: links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		}
+	}
+}
+
+
+export const cell600_inscribed = () => cell600_some_inscribed([5]);
+export const cell600_all_inscribed = () => cell600_some_inscribed([1,2,3,4,5]);
 
