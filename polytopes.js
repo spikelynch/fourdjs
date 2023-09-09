@@ -143,6 +143,26 @@ export const tesseract = () => {
 }
 
 
+const tesseract_some_inscribed = (ps) => {
+	const t = tesseract();
+
+	const i_links = []; 
+
+	for( const p of ps ) {
+		const nodes16 = t.nodes.filter((n) => n.label === p);
+		const links16 = auto_detect_edges(nodes16, 6);
+		links16.map((l) => l.label = p);
+		i_links.push(...links16);
+	}
+
+	t.links.push(...i_links);
+	return t;
+}
+
+
+export const tesseract_inscribed = () => tesseract_some_inscribed([1]);
+export const tesseract_all_inscribed = () => tesseract_some_inscribed([1,2]);
+
 
 const CELL24_INDEXING = {
 	x: { y: 1, z: 3, w: 2 },

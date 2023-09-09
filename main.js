@@ -65,17 +65,17 @@ const STRUCTURES = {
 	'tesseract': POLYTOPES.tesseract(),
 	'24-cell': POLYTOPES.cell24(),
 	'120-cell': POLYTOPES.cell120(),
-	'120-cell-all-inscribed': POLYTOPES.cell120_all_inscribed(),
 	'600-cell': POLYTOPES.cell600(),
-	'600-cell-all-inscribed': POLYTOPES.cell600_all_inscribed(),
 };
 
 const INSCRIBED = {
+	'tesseract': POLYTOPES.tesseract_inscribed(),
 	'120-cell': POLYTOPES.cell120_inscribed(),
 	'600-cell': POLYTOPES.cell600_inscribed(),
 };
 
 const ALL_INSCRIBED = {
+	'tesseract': POLYTOPES.tesseract_all_inscribed(),
 	'120-cell': POLYTOPES.cell120_all_inscribed(),
 	'600-cell': POLYTOPES.cell600_all_inscribed(),
 }
