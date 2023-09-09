@@ -188,14 +188,14 @@ export const cell24 = () => {
 	index_nodes(nodes);
 	const links = auto_detect_edges(nodes, 8);
 
-	links.map((l) => {
-		const ls = [ l.source, l.target ].map((nid) => node_by_id(nodes, nid).label);
-		for ( const c of [1, 2, 3] ) {
-			if( ! ls.includes(c) ) {
-				l.label = c
-			}
-		}
-	});
+	// links.map((l) => {
+	// 	const ls = [ l.source, l.target ].map((nid) => node_by_id(nodes, nid).label);
+	// 	for ( const c of [1, 2, 3] ) {
+	// 		if( ! ls.includes(c) ) {
+	// 			l.label = c
+	// 		}
+	// 	}
+	// });
 
 	return {
 		nodes: nodes,
@@ -206,6 +206,28 @@ export const cell24 = () => {
 		}
 	};
 }
+
+
+const cell24_some_inscribed = (ps) => {
+	const t = cell24();
+
+	const i_links = []; 
+
+	for( const p of ps ) {
+		const nodes16 = t.nodes.filter((n) => n.label === p);
+		const links16 = auto_detect_edges(nodes16, 6);
+		links16.map((l) => l.label = p);
+		i_links.push(...links16);
+	}
+
+	t.links.push(...i_links);
+	return t;
+}
+
+
+export const cell24_inscribed = () => cell24_some_inscribed([1]);
+export const cell24_all_inscribed = () => cell24_some_inscribed([1,2,3]);
+
 
 
 // face detection for the 120-cell

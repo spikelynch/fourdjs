@@ -70,12 +70,14 @@ const STRUCTURES = {
 
 const INSCRIBED = {
 	'tesseract': POLYTOPES.tesseract_inscribed(),
+	'24-cell': POLYTOPES.cell24_inscribed(),
 	'120-cell': POLYTOPES.cell120_inscribed(),
 	'600-cell': POLYTOPES.cell600_inscribed(),
 };
 
 const ALL_INSCRIBED = {
 	'tesseract': POLYTOPES.tesseract_all_inscribed(),
+	'24-cell': POLYTOPES.cell24_all_inscribed(),
 	'120-cell': POLYTOPES.cell120_all_inscribed(),
 	'600-cell': POLYTOPES.cell600_all_inscribed(),
 }
