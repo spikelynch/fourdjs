@@ -439,7 +439,7 @@ const cell120_some_inscribed = (ps) => {
 	}
 }
 
-export const cell120_inscribed = () => cell120_some_inscribed([5]);
+export const cell120_inscribed = () => cell120_some_inscribed([1]);
 export const cell120_all_inscribed = () => cell120_some_inscribed([1,2,3,4,5]);
 
 
@@ -665,6 +665,6 @@ const cell600_some_inscribed = (ps) => {
 }
 
 
-export const cell600_inscribed = () => cell600_some_inscribed([5]);
+export const cell600_inscribed = () => cell600_some_inscribed([1]);
 export const cell600_all_inscribed = () => cell600_some_inscribed([1,2,3,4,5]);
 
