@@ -46,7 +46,7 @@ class FourDGUI {
 
 		this.gui.add(this.params, 'shape',
 			[ '5-cell', '16-cell', 'tesseract',
-				'24-cell', '600-cell', '120-cell' ]
+				'24-cell', '600-cell', '120-cell', 'dodecahedron' ]
 		).onChange(changeShape)
 		this.gui.add(this.params, 'inscribed').onChange(changeShape);
 		this.gui.add(this.params, 'inscribe_all').onChange(changeShape);

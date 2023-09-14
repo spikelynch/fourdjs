@@ -64,6 +64,7 @@ const STRUCTURES = {
 	'16-cell': POLYTOPES.cell16(),
 	'tesseract': POLYTOPES.tesseract(),
 	'24-cell': POLYTOPES.cell24(),
+	'dodecahedron': POLYTOPES.dodecahedron(),
 	'120-cell': POLYTOPES.cell120(),
 	'600-cell': POLYTOPES.cell600(),
 };

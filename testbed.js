@@ -907,25 +907,43 @@ function check_120cell_nodes(nodes) {
 		}
 	});
 }
+
+function make_dodecahedron_vertices() {
+	const phi = 0.5 * (1 + Math.sqrt(5));  
+	const phiinv = 1 / phi;    
+
+	const nodes = [
+			{ x: 1, y: 1, z: 1, w: 0 },
+			{ x: 1, y: 1, z: -1, w: 0 },
+			{ x: 1, y: -1, z: 1, w: 0 },
+			{ x: 1, y: -1, z: -1, w: 0 },
+			{ x: -1, y: 1, z: 1, w: 0 },
+			{ x: -1, y: 1, z: -1, w: 0 },
+			{ x: -1, y: -1, z: 1, w: 0 },
+			{ x: -1, y: -1, z: -1, w: 0 }
+		].flat();
+	scale_nodes(nodes, 0.5);
+	return nodes;
+}
  
 
-const nodes = make_120cell_vertices();
-const links = auto_detect_edges(nodes, 4);
-const faces = auto_120cell_faces(links);
+// const nodes = make_120cell_vertices();
+// const links = auto_detect_edges(nodes, 4);
+// const faces = auto_120cell_faces(links);
 
 
-console.log("Calculating 120-cell colours")
+// console.log("Calculating 120-cell colours")
 
-const a2 = arctic_two(nodes, links, faces, faces[0], 341)
+// const a2 = arctic_two(nodes, links, faces, faces[0], 341)
 
-console.log(`got ${a2.dodecahedra.length}`);
+// console.log(`got ${a2.dodecahedra.length}`);
 
-const labels = a2.labels;
+// const labels = a2.labels;
 
-console.log("labelling nodes");
-for( const cstr in labels ) {
-	label_nodes(nodes, labels[cstr], Number(cstr));
-}
+// console.log("labelling nodes");
+// for( const cstr in labels ) {
+// 	label_nodes(nodes, labels[cstr], Number(cstr));
+// }
 
 
 

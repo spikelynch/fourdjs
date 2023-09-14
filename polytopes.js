@@ -668,3 +668,54 @@ const cell600_some_inscribed = (ps) => {
 export const cell600_inscribed = () => cell600_some_inscribed([1]);
 export const cell600_all_inscribed = () => cell600_some_inscribed([1,2,3,4,5]);
 
+
+
+function make_dodecahedron_vertices() {
+	const phi = 0.5 * (1 + Math.sqrt(5));  
+	const phiinv = 1 / phi;    
+
+	const nodes = [
+			{ x: 1, y: 1, z: 1, w: 0 },
+			{ x: 1, y: 1, z: -1, w: 0 },
+			{ x: 1, y: -1, z: 1, w: 0 },
+			{ x: 1, y: -1, z: -1, w: 0 },
+
+			{ x: -1, y: 1, z: 1, w: 0 },
+			{ x: -1, y: 1, z: -1, w: 0 },
+			{ x: -1, y: -1, z: 1, w: 0 },
+			{ x: -1, y: -1, z: -1, w: 0 },
+
+			{ x: 0, y: phi, z: phiinv, w: 0 },
+			{ x: 0, y: phi, z: -phiinv, w: 0 },
+			{ x: 0, y: -phi, z: phiinv, w: 0 },
+			{ x: 0, y: -phi, z: -phiinv, w: 0 },
+
+			{ x: phiinv, y: 0, z: phi, w: 0 },
+			{ x: phiinv, y: 0, z: -phi, w: 0 },
+			{ x: -phiinv, y: 0, z: phi, w: 0 },
+			{ x: -phiinv, y: 0, z: -phi, w: 0 },
+
+			{ x: phi, y: phiinv, z:0, w: 0 },
+			{ x: phi, y: -phiinv, z:0, w: 0 },
+			{ x: -phi, y: phiinv, z:0, w: 0 },
+			{ x: -phi, y: -phiinv, z:0, w: 0 },
+		];
+	index_nodes(nodes);;
+	return nodes;
+}
+
+export const dodecahedron = () => {
+	const nodes  = make_dodecahedron_vertices();
+	const links = auto_detect_edges(nodes, 3);
+
+	return {
+		nodes: nodes,
+		links: links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		}
+	}
+}
+
+
