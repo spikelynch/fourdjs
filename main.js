@@ -74,6 +74,7 @@ const INSCRIBED = {
 	'24-cell': POLYTOPES.cell24_inscribed(),
 	'120-cell': POLYTOPES.cell120_inscribed(),
 	'600-cell': POLYTOPES.cell600_inscribed(),
+	'dodecahedron': POLYTOPES.dodecahedron_inscribed(),
 };
 
 const ALL_INSCRIBED = {
@@ -81,6 +82,7 @@ const ALL_INSCRIBED = {
 	'24-cell': POLYTOPES.cell24_all_inscribed(),
 	'120-cell': POLYTOPES.cell120_all_inscribed(),
 	'600-cell': POLYTOPES.cell600_all_inscribed(),
+	'dodecahedron': POLYTOPES.dodecahedron_all_inscribed(),
 }
 
 let shape = false;

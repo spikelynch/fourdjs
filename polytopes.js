@@ -652,16 +652,6 @@ const cell600_some_inscribed = (ps) => {
 			link_size: 0.02
 		},
 	}
-
-
-	return {
-		nodes: nodes,
-		links: links,
-		geometry: {
-			node_size: 0.02,
-			link_size: 0.02
-		}
-	}
 }
 
 
@@ -675,32 +665,32 @@ function make_dodecahedron_vertices() {
 	const phiinv = 1 / phi;    
 
 	const nodes = [
-			{ x: 1, y: 1, z: 1, w: 0 },
-			{ x: 1, y: 1, z: -1, w: 0 },
-			{ x: 1, y: -1, z: 1, w: 0 },
-			{ x: 1, y: -1, z: -1, w: 0 },
+			{ x: 1, y: 1, z: 1, w: 0, 			label: 4 },
+			{ x: 1, y: 1, z: -1, w: 0, 			label: 3 },
+			{ x: 1, y: -1, z: 1, w: 0, 			label: 3 },
+			{ x: 1, y: -1, z: -1, w: 0, 		label: 2 },
 
-			{ x: -1, y: 1, z: 1, w: 0 },
-			{ x: -1, y: 1, z: -1, w: 0 },
-			{ x: -1, y: -1, z: 1, w: 0 },
-			{ x: -1, y: -1, z: -1, w: 0 },
+			{ x: -1, y: 1, z: 1, w: 0, 			label: 3 },
+			{ x: -1, y: 1, z: -1, w: 0, 		label: 1 },
+			{ x: -1, y: -1, z: 1, w: 0, 		label: 5 },
+			{ x: -1, y: -1, z: -1, w: 0, 		label: 3 },
 
-			{ x: 0, y: phi, z: phiinv, w: 0 },
-			{ x: 0, y: phi, z: -phiinv, w: 0 },
-			{ x: 0, y: -phi, z: phiinv, w: 0 },
-			{ x: 0, y: -phi, z: -phiinv, w: 0 },
+			{ x: 0, y: phi, z: phiinv, w: 0, 	label: 5 },
+			{ x: 0, y: phi, z: -phiinv, w: 0 , 	label: 2 },
+			{ x: 0, y: -phi, z: phiinv, w: 0, 	label: 4 },
+			{ x: 0, y: -phi, z: -phiinv, w: 0 , label: 1 },
 
-			{ x: phiinv, y: 0, z: phi, w: 0 },
-			{ x: phiinv, y: 0, z: -phi, w: 0 },
-			{ x: -phiinv, y: 0, z: phi, w: 0 },
-			{ x: -phiinv, y: 0, z: -phi, w: 0 },
+			{ x: phiinv, y: 0, z: phi, w: 0 , 	label: 2},
+			{ x: phiinv, y: 0, z: -phi, w: 0 , 	label: 4},
+			{ x: -phiinv, y: 0, z: phi, w: 0 , 	label: 1},
+			{ x: -phiinv, y: 0, z: -phi, w: 0 , label: 5},
 
-			{ x: phi, y: phiinv, z:0, w: 0 },
-			{ x: phi, y: -phiinv, z:0, w: 0 },
-			{ x: -phi, y: phiinv, z:0, w: 0 },
-			{ x: -phi, y: -phiinv, z:0, w: 0 },
+			{ x: phi, y: phiinv, z:0, w: 0 , 	label: 1},
+			{ x: phi, y: -phiinv, z:0, w: 0 , 	label: 5},
+			{ x: -phi, y: phiinv, z:0, w: 0 , 	label: 4},
+			{ x: -phi, y: -phiinv, z:0, w: 0 , 	label: 2},
 		];
-	index_nodes(nodes);;
+	index_nodes(nodes);
 	return nodes;
 }
 
@@ -718,4 +708,30 @@ export const dodecahedron = () => {
 	}
 }
 
+const dodecahedron_some_inscribed = (ps) => {
+	const nodes  = make_dodecahedron_vertices();
+	const links = auto_detect_edges(nodes, 3);
+	const all_links = links;
+	all_links.map((l) => l.label = 0);
+
+	for( const p of ps) {
+		const tetran = nodes.filter((n) => n.label === p);
+		const tetral = auto_detect_edges(tetran, 3);
+		tetral.map((l) => l.label = p);
+		all_links.push(...tetral);
+	}
+
+	return {
+		nodes: nodes,
+		links: all_links,
+		geometry: {
+			node_size: 0.02,
+			link_size: 0.02
+		},
+	}
+}
+
+
+export const dodecahedron_inscribed = () => dodecahedron_some_inscribed([1]);
+export const dodecahedron_all_inscribed = () => dodecahedron_some_inscribed([1,2,3,4,5]);
 
