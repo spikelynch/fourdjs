@@ -7,7 +7,7 @@ const DEFAULTS = {
 	nodesize: 1.25,
 	linkopacity: 0.5,
 	link2opacity: 0.5,
-	shape: '120-cell',
+	shape: 'five-cubes',
 	inscribed: false,
 	inscribe_all: false,
 	color: 0x3293a9,
@@ -45,7 +45,7 @@ class FourDGUI {
 		};
 
 		this.gui.add(this.params, 'shape',
-			[ 'dodecahedron', '5-cell', '16-cell', 'tesseract',
+			[ 'dodecahedron', 'five-cubes', '5-cell', '16-cell', 'tesseract',
 				'24-cell', '600-cell', '120-cell' ]
 		).onChange(changeShape)
 		this.gui.add(this.params, 'inscribed').onChange(changeShape);

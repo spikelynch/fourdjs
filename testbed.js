@@ -913,16 +913,32 @@ function make_dodecahedron_vertices() {
 	const phiinv = 1 / phi;    
 
 	const nodes = [
-			{ x: 1, y: 1, z: 1, w: 0 },
-			{ x: 1, y: 1, z: -1, w: 0 },
-			{ x: 1, y: -1, z: 1, w: 0 },
-			{ x: 1, y: -1, z: -1, w: 0 },
-			{ x: -1, y: 1, z: 1, w: 0 },
-			{ x: -1, y: 1, z: -1, w: 0 },
-			{ x: -1, y: -1, z: 1, w: 0 },
-			{ x: -1, y: -1, z: -1, w: 0 }
-		].flat();
-	scale_nodes(nodes, 0.5);
+			{ x: 1, y: 1, z: 1, w: 0, 			label: 4 },
+			{ x: 1, y: 1, z: -1, w: 0, 			label: 3 },
+			{ x: 1, y: -1, z: 1, w: 0, 			label: 3 },
+			{ x: 1, y: -1, z: -1, w: 0, 		label: 2 },
+
+			{ x: -1, y: 1, z: 1, w: 0, 			label: 3 },
+			{ x: -1, y: 1, z: -1, w: 0, 		label: 1 },
+			{ x: -1, y: -1, z: 1, w: 0, 		label: 5 },
+			{ x: -1, y: -1, z: -1, w: 0, 		label: 3 },
+
+			{ x: 0, y: phi, z: phiinv, w: 0, 	label: 5 },
+			{ x: 0, y: phi, z: -phiinv, w: 0 , 	label: 2 },
+			{ x: 0, y: -phi, z: phiinv, w: 0, 	label: 4 },
+			{ x: 0, y: -phi, z: -phiinv, w: 0 , label: 1 },
+
+			{ x: phiinv, y: 0, z: phi, w: 0 , 	label: 2},
+			{ x: phiinv, y: 0, z: -phi, w: 0 , 	label: 4},
+			{ x: -phiinv, y: 0, z: phi, w: 0 , 	label: 1},
+			{ x: -phiinv, y: 0, z: -phi, w: 0 , label: 5},
+
+			{ x: phi, y: phiinv, z:0, w: 0 , 	label: 1},
+			{ x: phi, y: -phiinv, z:0, w: 0 , 	label: 5},
+			{ x: -phi, y: phiinv, z:0, w: 0 , 	label: 4},
+			{ x: -phi, y: -phiinv, z:0, w: 0 , 	label: 2},
+		];
+	index_nodes(nodes);
 	return nodes;
 }
  

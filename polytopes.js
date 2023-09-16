@@ -327,6 +327,8 @@ function make_120cell_vertices() {
 		].flat();
 	index_nodes(nodes);
 	scale_nodes(nodes, 0.5);
+	label_120cell(nodes);
+
 	return nodes;
 }
 
@@ -413,20 +415,18 @@ export const cell120 = () => {
 }
 
 
-const cell120_some_inscribed = (ps) => {
-	const nodes  = make_120cell_vertices();
-	const links = auto_detect_edges(nodes, 4);
-
-	label_120cell(nodes);
+const inscribed_polytope = (vertex_fn, edges, inscr_edges, parts) => {
+	const nodes  = vertex_fn();
+	const links = auto_detect_edges(nodes, edges);
 
 	const all_links = links;
 	all_links.map((l) => l.label = 0);
 
-	for( const p of ps) {
-		const nodes600 = nodes.filter((n) => n.label === p);
-		const links600 = auto_detect_edges(nodes600, 12);
-		links600.map((l) => l.label = p);
-		all_links.push(...links600);
+	for( const p of parts ) {
+		const nodes_in = nodes.filter((n) => n.label === p);
+		const links_in = auto_detect_edges(nodes_in, inscr_edges);
+		links_in.map((l) => l.label = p);
+		all_links.push(...links_in);
 	}
 
 	return {
@@ -439,8 +439,13 @@ const cell120_some_inscribed = (ps) => {
 	}
 }
 
-export const cell120_inscribed = () => cell120_some_inscribed([1]);
-export const cell120_all_inscribed = () => cell120_some_inscribed([1,2,3,4,5]);
+
+export const cell120_inscribed = () => inscribed_polytope(
+	make_120cell_vertices, 4, 12, [1]
+);
+export const cell120_all_inscribed = () => inscribed_polytope(
+	make_120cell_vertices, 4, 12, [1,2,3,4,5]
+);
 
 
 // Schoute's partition via https://arxiv.org/abs/1010.4353
@@ -628,36 +633,12 @@ export const cell600 = () => {
 	}
 }
 
-
-
-const cell600_some_inscribed = (ps) => {
-	const nodes  = make_600cell_vertices();
-	const links = auto_detect_edges(nodes, 12);
-
-	const all_links = links;
-	all_links.map((l) => l.label = 0);
-
-	for( const p of ps) {
-		const nodes24 = nodes.filter((n) => n.label === p);
-		const links24 = auto_detect_edges(nodes24, 8);
-		links24.map((l) => l.label = p);
-		all_links.push(...links24);
-	}
-
-	return {
-		nodes: nodes,
-		links: all_links,
-		geometry: {
-			node_size: 0.02,
-			link_size: 0.02
-		},
-	}
-}
-
-
-export const cell600_inscribed = () => cell600_some_inscribed([1]);
-export const cell600_all_inscribed = () => cell600_some_inscribed([1,2,3,4,5]);
-
+export const cell600_inscribed = () => inscribed_polytope(
+	make_600cell_vertices, 12, 8, [1]
+);
+export const cell600_all_inscribed = () => inscribed_polytope(
+	make_600cell_vertices, 12, 8, [1,2,3,4,5]
+);
 
 
 function make_dodecahedron_vertices() {
@@ -708,18 +689,42 @@ export const dodecahedron = () => {
 	}
 }
 
-const dodecahedron_some_inscribed = (ps) => {
+export const dodecahedron_inscribed = () => inscribed_polytope(
+	make_dodecahedron_vertices, 3, 3, [1]
+);
+export const dodecahedron_all_inscribed = () => inscribed_polytope(
+	make_dodecahedron_vertices, 3, 3, [1,2,3,4,5]
+);
+
+
+// this can't be done with inscribed_polytope because each vertex
+// belongs to two cubes
+
+export const dodecahedron_five_cubes = (parts) => {
 	const nodes  = make_dodecahedron_vertices();
 	const links = auto_detect_edges(nodes, 3);
 	const all_links = links;
 	all_links.map((l) => l.label = 0);
 
-	for( const p of ps) {
-		const tetran = nodes.filter((n) => n.label === p);
-		const tetral = auto_detect_edges(tetran, 3);
-		tetral.map((l) => l.label = p);
-		all_links.push(...tetral);
-	}
+	const CUBES = { 
+		1: [ 1, 2, 3, 4, 5, 6, 7, 8 ],
+		2: [ 4, 5, 10, 11, 13, 16, 17, 20],
+		3: [ 2, 7, 9, 12, 13, 16, 18, 19],
+		4: [ 1, 8, 10, 11, 14, 15, 18, 19],
+		5: [ 3, 6, 9, 12, 14, 15, 17, 20]
+	};
+	if( parts.length > 0 ) {
+	//	console.log(parts);
+		//console.log(parts.map(String));
+		//nodes.map((n) => n.label = 0);
+		for( const label of parts.map(String) ) {
+			console.log(`label = ${label}`);
+			const cube = nodes.filter((n) => CUBES[label].includes(n.id));
+			const cubel = auto_detect_edges(cube, 3);
+			cubel.map((l) => l.label = Number(label));
+			all_links.push(...cubel);
+ 		}
+ 	}
 
 	return {
 		nodes: nodes,
@@ -727,11 +732,11 @@ const dodecahedron_some_inscribed = (ps) => {
 		geometry: {
 			node_size: 0.02,
 			link_size: 0.02
-		},
+		}
 	}
 }
 
-
-export const dodecahedron_inscribed = () => dodecahedron_some_inscribed([1]);
-export const dodecahedron_all_inscribed = () => dodecahedron_some_inscribed([1,2,3,4,5]);
+export const five_cubes = () => dodecahedron_five_cubes([]);
+export const five_cubes_inscribed = () => dodecahedron_five_cubes([1]);
+export const five_cubes_all_inscribed = () => dodecahedron_five_cubes([1,2,3,4,5]);
 

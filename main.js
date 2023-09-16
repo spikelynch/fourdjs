@@ -65,6 +65,7 @@ const STRUCTURES = {
 	'tesseract': POLYTOPES.tesseract(),
 	'24-cell': POLYTOPES.cell24(),
 	'dodecahedron': POLYTOPES.dodecahedron(),
+	'five-cubes': POLYTOPES.five_cubes(),
 	'120-cell': POLYTOPES.cell120(),
 	'600-cell': POLYTOPES.cell600(),
 };
@@ -75,6 +76,7 @@ const INSCRIBED = {
 	'120-cell': POLYTOPES.cell120_inscribed(),
 	'600-cell': POLYTOPES.cell600_inscribed(),
 	'dodecahedron': POLYTOPES.dodecahedron_inscribed(),
+	'five-cubes': POLYTOPES.five_cubes_inscribed(),
 };
 
 const ALL_INSCRIBED = {
@@ -83,6 +85,7 @@ const ALL_INSCRIBED = {
 	'120-cell': POLYTOPES.cell120_all_inscribed(),
 	'600-cell': POLYTOPES.cell600_all_inscribed(),
 	'dodecahedron': POLYTOPES.dodecahedron_all_inscribed(),
+	'five-cubes': POLYTOPES.five_cubes_all_inscribed(),
 }
 
 let shape = false;
